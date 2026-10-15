@@ -9,6 +9,25 @@ future edit, so it learns your style.
 
 ## Setup (once)
 
+### One prompt
+
+Open Claude Code in any folder (terminal: `claude`, or the Code tab in the Claude desktop app)
+and paste:
+
+```text
+Set up free247editor for me. Clone https://github.com/riecodes/free247editor.git into my
+Documents folder (install Git first if it is missing, after asking me). Then follow the
+"start" steps in its CLAUDE.md: run node setup.mjs from that folder, install anything it
+reports missing after asking me, help me choose free transcription (a Groq key I paste into
+.env myself, or local faster-whisper), open the test video, and walk me through style setup.
+When you finish, tell me the full path of the inbox folder and remind me to open Claude in
+the free247editor folder from now on.
+```
+
+From then on, open Claude in the `free247editor` folder so it reads its `CLAUDE.md`.
+
+### Step by step
+
 1. **Get it.** `git clone https://github.com/riecodes/free247editor.git`, or use
    *Code > Download ZIP* on GitHub and unzip it.
 2. **Open the folder in Claude Code.** In a terminal: `cd free247editor` then `claude`.
