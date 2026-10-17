@@ -1,6 +1,8 @@
 # free247editor
 
-A free, open-source personal video editor that runs inside Claude.
+A free, open-source personal video editor that runs inside your AI coding agent: Claude Code,
+Codex, Cursor, Antigravity, Gemini CLI, GitHub Copilot, Windsurf, and others that support
+[Agent Skills](https://agentskills.io).
 
 Drop in a raw video and say **"edit this"**. You get back a cut, captioned edit with motion
 graphics, zoom-ins, and sound. Then give notes in plain words (English, Tagalog, Taglish),
@@ -11,35 +13,38 @@ future edit, so it learns your style.
 
 ### One prompt
 
-Open Claude Code in any folder (terminal: `claude`, or the Code tab in the Claude desktop app)
-and paste:
+Open your agent in any folder (for example `claude` or `codex` in a terminal, or a new chat
+in Cursor or Antigravity) and paste:
 
 ```text
 Set up free247editor for me. Clone https://github.com/riecodes/free247editor.git into my
 Documents folder (install Git first if it is missing, after asking me). Then follow the
-"start" steps in its CLAUDE.md: run node setup.mjs from that folder, install anything it
-reports missing after asking me, help me choose free transcription (a Groq key I paste into
-.env myself, or local faster-whisper), open the test video, and walk me through style setup.
-When you finish, tell me the full path of the inbox folder and remind me to open Claude in
-the free247editor folder from now on.
+"start" steps in its skill, .agents/skills/free247editor/SKILL.md: run node setup.mjs from
+that folder, install anything it reports missing after asking me, help me choose free
+transcription (a Groq key I paste into .env myself, or local faster-whisper), open the test
+video, and walk me through style setup. When you finish, tell me the full path of the inbox
+folder and remind me to open my agent in the free247editor folder from now on.
 ```
 
-From then on, open Claude in the `free247editor` folder so it reads its `CLAUDE.md`.
+From then on, open your agent in the `free247editor` folder so it finds the skill.
 
 ### Step by step
 
 1. **Get it.** `git clone https://github.com/riecodes/free247editor.git`, or use
    *Code > Download ZIP* on GitHub and unzip it.
-2. **Open the folder in Claude Code.** In a terminal: `cd free247editor` then `claude`.
-   Or, in the Claude desktop app, open the Code tab and choose the folder.
-3. **Type `start`.** Claude checks your computer, installs what is missing (with your OK),
+2. **Open the folder in your agent.** In a terminal: `cd free247editor` then `claude` or
+   `codex`. In Cursor, Antigravity, or Windsurf, open the folder as the workspace.
+3. **Type `start`.** The agent checks your computer, installs what is missing (with your OK),
    renders a test video, and asks a few questions about your style.
 
 ## Editing
 
-1. Put a raw video in the `inbox` folder, or drag it into the Claude chat.
+1. Put a raw video in the `inbox` folder, or drag it into the agent's chat.
 2. Say **"edit this"**.
-3. Watch the draft from `outbox`, tell Claude what to change, and repeat until you say "final".
+3. Watch the draft from `outbox`, say what to change, and repeat until you say "final".
+
+Plain words are enough; every agent picks the skill from its description. You can also call
+it by name: `/free247editor` in Claude Code and Cursor, `$free247editor` in Codex.
 
 Vertical 9:16 for Reels, TikTok, and Shorts by default. Ask for a horizontal version for
 YouTube and it gets its own framing and text placement.
@@ -59,22 +64,34 @@ YouTube and it gets its own framing and text placement.
 
 ## What you need
 
-- **Claude Code** with a paid Claude plan. Editing uses a lot of usage; Pro works, Max is
-  better if you edit often.
-- **Node.js 22+, Git, FFmpeg, and Chrome.** Setup tells you what is missing and Claude can
+- **An AI coding agent that can run terminal commands**, such as Claude Code (paid Claude
+  plan; Pro works, Max is better if you edit often), Codex, Cursor, Antigravity, Gemini CLI,
+  GitHub Copilot agent mode, or Windsurf. Editing uses a lot of usage. Codex blocks internet
+  in its sandbox by default, so approve network access when setup or transcription asks.
+- **Node.js 22+, Git, FFmpeg, and Chrome.** Setup tells you what is missing and the agent can
   install it for you.
 - **Transcription, free either way:** a free [Groq](https://console.groq.com/keys) key
   (fast, best for Taglish), or [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
   on your own computer (`pip install faster-whisper`, needs Python).
 - About 1 GB of disk space.
 
-Tested on Windows 11 (setup, test render, transcription, and the cutting tools). The editing
-engine is cross-platform, so macOS and Linux should work, but they are not tested yet.
+Tested on Windows 11 with Claude Code (setup, test render, transcription, and the cutting
+tools). The other agents read the same standard files but are not tested yet. The editing
+engine is cross-platform, so macOS and Linux should work, but they are not tested yet either.
 
 ## Costs
 
-The software is free. You pay only for your Claude plan. Groq's free tier covers normal
-use. Claude will never call a paid service (ElevenLabs, Kie.ai, or others) without asking.
+The software is free. You pay only for your agent's plan. Groq's free tier covers normal
+use. The agent will never call a paid service (ElevenLabs, Kie.ai, or others) without asking.
+
+## How each agent finds it
+
+The whole editor is one skill, `.agents/skills/free247editor/SKILL.md`, in the shared
+Agent Skills folder that Codex, Cursor, Antigravity, Gemini CLI, GitHub Copilot, Windsurf,
+and OpenCode read. Claude Code reads skills only from `.claude/skills/`, so a short copy
+there points to the same file. `AGENTS.md`, which `CLAUDE.md` imports, tells every agent to
+use the skill. Edit only `.agents/skills/free247editor/SKILL.md`; if you change its
+description, copy the new one into `.claude/skills/free247editor/SKILL.md` too.
 
 ## Not included
 
@@ -87,7 +104,9 @@ use. Claude will never call a paid service (ElevenLabs, Kie.ai, or others) witho
 
 ```
 free247editor/
-  CLAUDE.md          how Claude runs your editor
+  .agents/skills/    the free247editor skill: how your agent runs the editor
+  .claude/skills/    pointer to that skill for Claude Code
+  AGENTS.md          tells every agent to use the skill (CLAUDE.md imports it)
   setup.mjs          one-time setup (safe to re-run)
   tools/             free transcription
   inbox/             your raw videos
@@ -114,7 +133,7 @@ Nate Herk (MIT), built on [HyperFrames](https://github.com/heygen-com/hyperframe
 here. The AI Automation Society brand assets inside that kit belong to their owner and are
 not licensed for reuse.
 
-free247editor is not affiliated with Anthropic, Nate Herk, or HeyGen.
+free247editor is not affiliated with Nate Herk, HeyGen, or any of the AI agent makers.
 
 ## License
 

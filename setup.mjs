@@ -84,4 +84,4 @@ console.log(`Groq key in .env: ${groq ? 'yes' : 'no'}`);
 console.log(`Local faster-whisper: ${localWhisper ? 'yes' : 'no'}`);
 
 console.log(`\nSETUP COMPLETE${groq || localWhisper ? '' : ' (transcription not configured yet)'}`);
-console.log(`Drop raw videos in ${resolve(root, 'inbox')} or drag one into Claude and say "edit this".`);
+console.log(`Drop raw videos in ${resolve(root, 'inbox')} or drag one into your agent's chat and say "edit this".`);
