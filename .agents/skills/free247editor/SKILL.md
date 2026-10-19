@@ -33,14 +33,29 @@ network access (Codex does by default), ask the user to approve network access f
 
 1. Say in one line that you will set things up, then run `node setup.mjs`.
    - If it stops on missing tools, show the install command it printed, ask once, then run it.
-     After installing, tell the user to close and reopen their agent (or its terminal) so the
-     new tools are found, then type `start` again.
+     On macOS without Homebrew, ask the user to paste Homebrew's installer into Terminal
+     themselves, since it asks for their Mac password:
+     `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+   - On Windows, your shell keeps the PATH it started with, so tools you just installed show as
+     "not recognized". Do not ask the user to restart. Reload PATH at the start of each later
+     command instead. In PowerShell:
+     `$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User'); node setup.mjs`
+     In Git Bash:
+     `export PATH="$PATH:$(cygpath -p "$(powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')" | tr -d '\r')")"; node setup.mjs`
+     Only if a tool is still missing after that, ask the user to fully close and reopen their
+     agent (on Windows, also from the tray), then type `start` again.
    - If the test render fails, run `npx hyperframes doctor` in `kit/video-projects/demo`,
      fix what it reports (usually Chrome), and re-run setup.
 2. If setup reports no transcription, ask which they want:
-   - Free Groq key (recommended: most accurate for Taglish, fast). They create one at
-     https://console.groq.com/keys and paste it after `GROQ_API_KEY=` in `.env` themselves.
-     Never ask them to paste the key into the chat, and never print it.
+   - Free Groq key (recommended: most accurate for Taglish, fast). Copy `.env.example` to
+     `.env` if it is missing. If you have browser tools (Claude in Chrome, or the Claude app's
+     browser), get the key for them: open https://console.groq.com/keys, let them sign in or
+     sign up themselves (never type their password), click Create API Key, name it
+     free247editor, and write the key after `GROQ_API_KEY=` in `.env` with a file edit. Groq
+     shows the key only once, so save it before closing that dialog. Without browser tools,
+     open the page and `.env` for them (`start` and `notepad .env` on Windows, `open` and
+     `open -e .env` on macOS) and let them paste it. Never ask them to paste the key into the
+     chat, and never print it.
    - On this computer (private, no account). Needs Python: `pip install faster-whisper`.
      Slower without an NVIDIA GPU; the first run downloads the model.
 3. Open `outbox/setup-test.mp4` for them (`start ""` on Windows, `open` on macOS, `xdg-open`

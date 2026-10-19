@@ -21,12 +21,14 @@ Set up free247editor for me. Clone https://github.com/riecodes/free247editor.git
 Documents folder (install Git first if it is missing, after asking me). Then follow the
 "start" steps in its skill, .agents/skills/free247editor/SKILL.md: run node setup.mjs from
 that folder, install anything it reports missing after asking me, help me choose free
-transcription (a Groq key I paste into .env myself, or local faster-whisper), open the test
-video, and walk me through style setup. When you finish, tell me the full path of the inbox
-folder and remind me to open my agent in the free247editor folder from now on.
+transcription (a Groq key, which you get for me if you have browser tools such as Claude in
+Chrome, or local faster-whisper), open the test video, and walk me through style setup. When
+you finish, tell me the full path of the inbox folder and remind me to open my agent in the
+free247editor folder from now on.
 ```
 
-From then on, open your agent in the `free247editor` folder so it finds the skill.
+From then on, open your agent in the `free247editor` folder so it finds the skill. The
+Claude desktop app works too: in its Code tab, pick Local and the folder.
 
 ### Step by step
 
