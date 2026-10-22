@@ -1,5 +1,7 @@
 # free247editor
 
+![License](https://img.shields.io/github/license/riecodes/free247editor?style=flat-square&color=green) ![Agent Skills](https://img.shields.io/badge/Agent-Skills-8A2BE2?style=flat-square) ![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-D97757?style=flat-square&logo=anthropic&logoColor=white) ![Price](https://img.shields.io/badge/price-free-brightgreen?style=flat-square)
+
 A free, open-source personal video editor that runs inside your AI coding agent: Claude Code,
 Codex, Cursor, Antigravity, Gemini CLI, GitHub Copilot, Windsurf, and others that support
 [Agent Skills](https://agentskills.io).
