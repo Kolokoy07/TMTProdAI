@@ -16,11 +16,11 @@ future edit, so it learns your style.
 ### One prompt
 
 Open your agent in any folder (for example `claude` or `codex` in a terminal, or a new chat
-in Cursor or Antigravity) and paste the prompt below. Replace `YOUR-ACCOUNT` with the GitHub
-account that hosts TMTProdAI.
+in Cursor or Antigravity) and paste the prompt below. The repository is private, so you need
+access to it on GitHub first.
 
 ```text
-Set up TMTProdAI for me. Clone https://github.com/YOUR-ACCOUNT/TMTProdAI.git into my
+Set up TMTProdAI for me. Clone https://github.com/Kolokoy07/TMTProdAI.git into my
 Documents folder (install Git first if it is missing, after asking me). Then follow the
 "start" steps in its skill, .agents/skills/tmtprodai/SKILL.md: run node setup.mjs from
 that folder, install anything it reports missing after asking me, help me choose free
@@ -35,7 +35,7 @@ Claude desktop app works too: in its Code tab, pick Local and the folder.
 
 ### Step by step
 
-1. **Get it.** `git clone https://github.com/YOUR-ACCOUNT/TMTProdAI.git`, or use
+1. **Get it.** `git clone https://github.com/Kolokoy07/TMTProdAI.git`, or use
    *Code > Download ZIP* on GitHub and unzip it.
 2. **Open the folder in your agent.** In a terminal: `cd TMTProdAI` then `claude` or
    `codex`. In Cursor, Antigravity, or Windsurf, open the folder as the workspace.
