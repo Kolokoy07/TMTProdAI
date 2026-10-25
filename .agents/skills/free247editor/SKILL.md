@@ -1,6 +1,6 @@
 ---
 name: free247editor
-description: The user's personal video editor in this free247editor folder. Use for "start" or first-time setup; "edit this", "edit mo to", or a video dropped in or added to inbox/; notes on a draft ("faster", "bigger captions", "approved", "final"); a horizontal or YouTube version; or changing the user's style or rules. Runs setup.mjs, free transcription, and the Herk Edit Kit pipeline in kit/, renders drafts to outbox/, and saves lasting notes to my-rules.md.
+description: The user's personal video editor in this free247editor folder. Use for "start" or first-time setup; "edit this", "edit mo to", or a video dropped in or added to inbox/; notes on a draft ("faster", "bigger captions", "approved", "final"); a horizontal or YouTube version; changing the user's style or rules; or opening Style Studio to build named styles ("edit this with <style>"). Runs setup.mjs, free transcription, and the Herk Edit Kit pipeline in kit/, renders drafts to outbox/, and saves lasting notes to my-rules.md.
 ---
 
 # free247editor: the user's personal video editor
@@ -18,6 +18,8 @@ editing or coding terms. Run every command from the repo root unless a step says
 | `inbox/` | Raw videos the user wants edited. |
 | `outbox/` | Every draft and final you render, named `<slug>-v1.mp4`, `<slug>-final.mp4`. |
 | `my-style.md` | The user's style, written during style setup. |
+| `styles/` | Named styles saved from Style Studio: `<slug>.json` (exact values) and `<slug>.md`; `DEFAULT` names the default. |
+| `tools/style-studio/` | Style Studio, the local style picker (`node tools/style-studio/server.mjs`, port 4747). |
 | `my-rules.md` | Lasting rules learned from the user's notes. |
 | `my-sounds/` | Music and sound effects the user supplies. |
 | `kit/` | The editing engine, Herk Edit Kit, installed by setup. Never edit files in it. |
@@ -84,6 +86,20 @@ If a video is already in `inbox/`, render a 5-second sample of their chosen capt
 own footage, show it, and adjust before saving. Write `my-style.md` as short plain bullets,
 one per choice, in the user's words where they gave them.
 
+## Styles: "open Style Studio", "make a new style", "edit this with <style>"
+
+Style Studio builds named looks with a tab per part: Colours, Fonts, Hook, Captions, Visuals,
+Extras, Watch. To open it, run `node tools/style-studio/server.mjs` in the background and open
+http://localhost:4747 (the Claude app's browser pane, or `start http://localhost:4747`). The user
+picks options there; you do not edit `styles/` files by hand unless they ask.
+
+Choosing a style for an edit: the style the user names ("with Punchy Orange"), else the slug in
+`styles/DEFAULT`, else `my-style.md` alone. Read the style's `.md` for intent and its `.json` for
+exact values (font families and weights, sizes, colours, caption y and max characters, hook and
+title motion and timing, backing, grade, SFX set, music level, CTA keyword). All fonts are Google
+Fonts the HyperFrames compiler fetches by family name. Order of authority: `my-rules.md`, then the
+chosen style, then `my-style.md`, then the kit's house style.
+
 ## Editing: "edit this", "edit mo to", a dropped video, or a new file in inbox/
 
 The request approves the whole local pipeline: transcription with the configured provider,
@@ -100,7 +116,8 @@ any other paid API). The default is to use none of them.
 3. From the repo root: `node tools/transcribe.mjs kit/video-projects/<slug>/assets/raw.mp4`
    (add `--local` when `.env` has no Groq key). This writes `raw.json` and replaces the kit's
    ElevenLabs step.
-4. Read `my-style.md` and `my-rules.md`. Rules beat style; style beats the kit's house style.
+4. Read `my-rules.md`, the chosen style from `styles/` (see Styles), and `my-style.md`. Rules beat
+   the chosen style; the chosen style beats `my-style.md`; both beat the kit's house style.
 5. Read `kit/AGENTS.md`, then follow the kit skill `short-form-edit` for vertical or short
    videos (under 3 minutes) or `edit-video` for long horizontal ones. Use the user's own
    footage. Extra clips in `inbox/` that the user calls B-roll are B-roll. Use `my-sounds/` for

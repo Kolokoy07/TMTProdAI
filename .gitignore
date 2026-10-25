@@ -12,6 +12,8 @@ my-sounds/*
 !my-sounds/.gitkeep
 my-style.md
 my-rules.md
+styles/*
+!styles/README.md
 *.transcribe.mp3
 
 # Sync tools

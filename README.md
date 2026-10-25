@@ -53,6 +53,20 @@ it by name: `/free247editor` in Claude Code and Cursor, `$free247editor` in Code
 Vertical 9:16 for Reels, TikTok, and Shorts by default. Ask for a horizontal version for
 YouTube and it gets its own framing and text placement.
 
+## Styles
+
+Build several named looks for your shorts in **Style Studio**, a local page with a tab for each
+part of the look: Colours, Fonts, Hook, Captions, Visuals, Extras, and Watch. Every option
+previews on a frame of your own footage, and Play runs the hook, a title, and captions with sound.
+
+```bash
+node tools/style-studio/server.mjs
+```
+
+Then open http://localhost:4747 (or ask your agent to "open Style Studio"). Saved styles go to
+`styles/` and stay on your computer. Pick one as the default, or say **"edit this with
+<style name>"** to use a different one for a video.
+
 ## What it does
 
 | | |
@@ -112,9 +126,10 @@ free247editor/
   .claude/skills/    pointer to that skill for Claude Code
   AGENTS.md          tells every agent to use the skill (CLAUDE.md imports it)
   setup.mjs          one-time setup (safe to re-run)
-  tools/             free transcription
+  tools/             free transcription and Style Studio
   inbox/             your raw videos
   outbox/            drafts and finals
+  styles/            named styles saved from Style Studio (stay private)
   my-style.md        your style (created at setup, stays private)
   my-rules.md        rules learned from your notes (stays private)
   my-sounds/         your music and sound effects

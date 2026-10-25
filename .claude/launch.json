@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "style-studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["tools/style-studio/server.mjs"],
+      "port": 4747
+    }
+  ]
+}
