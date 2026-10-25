@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Style Studio: a local page for building named short-form styles (colours, fonts, hook, captions,
 // visuals, extras) on frames of your own footage. Saves to styles/<slug>.json plus a readable
-// styles/<slug>.md that the free247editor skill reads when editing.
+// styles/<slug>.md that the TMTProdAI skill reads when editing.
 //
 //   node tools/style-studio/server.mjs        then open http://localhost:4747
 import { createServer } from 'node:http';

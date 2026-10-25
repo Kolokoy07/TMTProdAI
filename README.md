@@ -1,6 +1,6 @@
-# free247editor
+# TMTProdAI
 
-![License](https://img.shields.io/github/license/riecodes/free247editor?style=flat-square&color=green) ![Agent Skills](https://img.shields.io/badge/Agent-Skills-8A2BE2?style=flat-square) ![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-D97757?style=flat-square&logo=anthropic&logoColor=white) ![Price](https://img.shields.io/badge/price-free-brightgreen?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-green?style=flat-square) ![Agent Skills](https://img.shields.io/badge/Agent-Skills-8A2BE2?style=flat-square) ![Claude Code](https://img.shields.io/badge/Claude%20Code-ready-D97757?style=flat-square&logo=anthropic&logoColor=white) ![Price](https://img.shields.io/badge/price-free-brightgreen?style=flat-square)
 
 A free, open-source personal video editor that runs inside your AI coding agent: Claude Code,
 Codex, Cursor, Antigravity, Gemini CLI, GitHub Copilot, Windsurf, and others that support
@@ -16,27 +16,28 @@ future edit, so it learns your style.
 ### One prompt
 
 Open your agent in any folder (for example `claude` or `codex` in a terminal, or a new chat
-in Cursor or Antigravity) and paste:
+in Cursor or Antigravity) and paste the prompt below. Replace `YOUR-ACCOUNT` with the GitHub
+account that hosts TMTProdAI.
 
 ```text
-Set up free247editor for me. Clone https://github.com/riecodes/free247editor.git into my
+Set up TMTProdAI for me. Clone https://github.com/YOUR-ACCOUNT/TMTProdAI.git into my
 Documents folder (install Git first if it is missing, after asking me). Then follow the
-"start" steps in its skill, .agents/skills/free247editor/SKILL.md: run node setup.mjs from
+"start" steps in its skill, .agents/skills/tmtprodai/SKILL.md: run node setup.mjs from
 that folder, install anything it reports missing after asking me, help me choose free
 transcription (a Groq key, which you get for me if you have browser tools such as Claude in
 Chrome, or local faster-whisper), open the test video, and walk me through style setup. When
 you finish, tell me the full path of the inbox folder and remind me to open my agent in the
-free247editor folder from now on.
+TMTProdAI folder from now on.
 ```
 
-From then on, open your agent in the `free247editor` folder so it finds the skill. The
+From then on, open your agent in the `TMTProdAI` folder so it finds the skill. The
 Claude desktop app works too: in its Code tab, pick Local and the folder.
 
 ### Step by step
 
-1. **Get it.** `git clone https://github.com/riecodes/free247editor.git`, or use
+1. **Get it.** `git clone https://github.com/YOUR-ACCOUNT/TMTProdAI.git`, or use
    *Code > Download ZIP* on GitHub and unzip it.
-2. **Open the folder in your agent.** In a terminal: `cd free247editor` then `claude` or
+2. **Open the folder in your agent.** In a terminal: `cd TMTProdAI` then `claude` or
    `codex`. In Cursor, Antigravity, or Windsurf, open the folder as the workspace.
 3. **Type `start`.** The agent checks your computer, installs what is missing (with your OK),
    renders a test video, and asks a few questions about your style.
@@ -48,7 +49,7 @@ Claude desktop app works too: in its Code tab, pick Local and the folder.
 3. Watch the draft from `outbox`, say what to change, and repeat until you say "final".
 
 Plain words are enough; every agent picks the skill from its description. You can also call
-it by name: `/free247editor` in Claude Code and Cursor, `$free247editor` in Codex.
+it by name: `/tmtprodai` in Claude Code and Cursor, `$tmtprodai` in Codex.
 
 Vertical 9:16 for Reels, TikTok, and Shorts by default. Ask for a horizontal version for
 YouTube and it gets its own framing and text placement.
@@ -104,12 +105,12 @@ use. The agent will never call a paid service (ElevenLabs, Kie.ai, or others) wi
 
 ## How each agent finds it
 
-The whole editor is one skill, `.agents/skills/free247editor/SKILL.md`, in the shared
+The whole editor is one skill, `.agents/skills/tmtprodai/SKILL.md`, in the shared
 Agent Skills folder that Codex, Cursor, Antigravity, Gemini CLI, GitHub Copilot, Windsurf,
 and OpenCode read. Claude Code reads skills only from `.claude/skills/`, so a short copy
 there points to the same file. `AGENTS.md`, which `CLAUDE.md` imports, tells every agent to
-use the skill. Edit only `.agents/skills/free247editor/SKILL.md`; if you change its
-description, copy the new one into `.claude/skills/free247editor/SKILL.md` too.
+use the skill. Edit only `.agents/skills/tmtprodai/SKILL.md`; if you change its
+description, copy the new one into `.claude/skills/tmtprodai/SKILL.md` too.
 
 ## Not included
 
@@ -121,8 +122,8 @@ description, copy the new one into `.claude/skills/free247editor/SKILL.md` too.
 ## Folders
 
 ```
-free247editor/
-  .agents/skills/    the free247editor skill: how your agent runs the editor
+TMTProdAI/
+  .agents/skills/    the tmtprodai skill: how your agent runs the editor
   .claude/skills/    pointer to that skill for Claude Code
   AGENTS.md          tells every agent to use the skill (CLAUDE.md imports it)
   setup.mjs          one-time setup (safe to re-run)
@@ -152,7 +153,7 @@ Nate Herk (MIT), built on [HyperFrames](https://github.com/heygen-com/hyperframe
 here. The AI Automation Society brand assets inside that kit belong to their owner and are
 not licensed for reuse.
 
-free247editor is not affiliated with Nate Herk, HeyGen, or any of the AI agent makers.
+TMTProdAI is not affiliated with Nate Herk, HeyGen, or any of the AI agent makers.
 
 ## License
 
