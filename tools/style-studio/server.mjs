@@ -49,14 +49,47 @@ function frames(refresh = false) {
   return out;
 }
 
+// Screen-share split previews: a screen frame and the speaker's camera bubble from the newest project made
+// with that format (one with source.json and reel clips). The bubble corner is the one with skin tones.
+const SPLIT = ['split-screen.jpg', 'split-face.jpg'];
+const BUBBLES = [[0.773, 0.752, 0.219, 0.216], [0.017, 0.735, 0.219, 0.216], [0.023, 0.025, 0.219, 0.216]];
+function splitFrames(refresh = false) {
+  if (!refresh && SPLIT.every((n) => existsSync(join(cacheDir, n)))) return SPLIT;
+  const projects = join(root, 'kit', 'video-projects');
+  const proj = existsSync(projects) ? newest(readdirSync(projects).map((p) => join(projects, p, 'source.json'))) : null;
+  if (!proj) return [];
+  const assets = join(dirname(proj), 'assets');
+  const clips = readdirSync(assets).filter((d) => /^r\d+$/.test(d)).map((d) => join(assets, d, 'clip.mp4')).filter(existsSync);
+  for (const clip of clips) {
+    const dur = Number(spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', clip], { encoding: 'utf8' }).stdout) || 30;
+    for (const at of [0.3, 0.55, 0.8]) {
+      for (const [x, y, w, h] of BUBBLES) {
+        const crop = `crop=iw*${w}:ih*${h}:iw*${x}:ih*${y}`;
+        const raw = spawnSync('ffmpeg', ['-v', 'error', '-ss', String(dur * at), '-i', clip, '-frames:v', '1', '-vf', `${crop},scale=32:18`, '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 20 }).stdout;
+        let skin = 0;
+        for (let i = 0; i < raw.length; i += 3) {
+          const r = raw[i], g = raw[i + 1], b = raw[i + 2];
+          if (r > 95 && g > 40 && b > 20 && r > g && r > b && r - Math.min(g, b) > 15 && Math.abs(r - g) > 15) skin++;
+        }
+        if (!raw.length || skin / (raw.length / 3) < 0.1) continue;
+        spawnSync('ffmpeg', ['-v', 'error', '-y', '-ss', String(dur * at), '-i', clip, '-frames:v', '1', '-vf', 'scale=1280:720', '-q:v', '3', join(cacheDir, SPLIT[0])]);
+        spawnSync('ffmpeg', ['-v', 'error', '-y', '-ss', String(dur * at), '-i', clip, '-frames:v', '1', '-vf', `${crop},scale=980:-2`, '-q:v', '3', join(cacheDir, SPLIT[1])]);
+        return SPLIT;
+      }
+    }
+  }
+  return [];
+}
+
 const listStyles = () => (existsSync(stylesDir) ? readdirSync(stylesDir) : [])
   .filter((f) => f.endsWith('.json')).map((f) => {
-    try { const s = JSON.parse(readFileSync(join(stylesDir, f), 'utf8')); return { slug: s.slug, name: s.name, updated: s.updated }; } catch { return null; }
+    try { const s = JSON.parse(readFileSync(join(stylesDir, f), 'utf8')); return { slug: s.slug, name: s.name, updated: s.updated, format: s.layout ? 'split' : 'reels' }; } catch { return null; }
   }).filter(Boolean).sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
 const defaultSlug = () => { try { return readFileSync(join(stylesDir, 'DEFAULT'), 'utf8').trim(); } catch { return null; } };
 
 // The .md is what the editor reads: plain bullets with the exact values to apply.
 function toMarkdown(s) {
+  if (s.layout) return splitMarkdown(s);
   const c = s.colours, f = s.fonts, h = s.hook, k = s.captions, v = s.visuals, x = s.extras;
   return `# Style: ${s.name}
 
@@ -71,6 +104,36 @@ Saved from Style Studio ${s.updated}. Machine-readable values: \`styles/${s.slug
 - Look: grade ${v.grade}, pace ${v.pace}, punch-in zooms ${v.punchIns}
 - Sound: SFX ${x.sfx}; music ${x.music} about ${Math.abs(x.musicDb)} dB under the voice, ducked under speech
 - CTA: keyword "${x.ctaKeyword}"${x.ctaPops ? ', pop on each spoken keyword' : ''}
+`;
+}
+
+// Screen-share split: the layout values the format's build-reel.mjs reads, in plain words
+function splitMarkdown(s) {
+  const c = s.colours, f = s.fonts, k = s.captions, L = s.layout, x = s.extras;
+  return `# Style: ${s.name}
+
+Saved from Style Studio ${s.updated}. Machine-readable values: \`styles/${s.slug}.json\`. Scripts and sounds:
+\`styles/screen-share-split/\` (see its README).
+
+Use for: ${s.use || 'screen recordings with the speaker in a camera bubble, cut into educational reels'}.
+Talking-head reels use a Reels-format style instead.
+
+- Format: ${s.format}, split screen. Screen share on top, the speaker always in the bottom panel,
+  captions on the seam between them; every graphic inside the Reels/TikTok safe zone.
+- Speaker panel: the camera bubble cropped from the 4K recording, following it to whichever corner it
+  is in; full-screen camera shots show the speaker centred below and a glass title card on top.
+- Screen share: zoomed about ${L.screen.zoom}x on where things happen, moving only when the action moves;
+  each new section opens wide, then zooms in.
+- Topic chip: "${L.chipLabel || 'Mate Portal'} / <topic>" in the speaker panel's top-left corner
+- Cards: small glass cards on the ${L.cards.side || 'left'} of the speaker, anchored to the words they explain
+- Colours (${c.id}): headline gradient ${c.primary} to ${c.primaryEnd}, accent ${c.accent}, captions ${c.caption}, shade ${c.shade}, glass glow ${c.glow || '#2bd46a'}
+- Fonts (${f.id}): headline ${f.headline.family} ${f.headline.weight}; accent ${f.accent.family}${f.accent.italic ? ' italic' : ''}; captions ${f.caption.family} ${f.caption.weight}
+- Hook: 4.6 s, ${s.hook.motion}, heavy word + accent line + small question line; sound ${s.hook.sound}
+- Captions: one line, max ${k.maxChars} characters, ${k.size}px, words rise out of a blur as spoken
+- Look: liquid glass panels over drifting glows, ${s.visuals.grade} grade, ${s.visuals.pace} cuts, no speed-ups
+- Sound: SFX ${x.sfx}; ambient pad about ${Math.abs(x.musicDb)} dB under the voice, ducked under speech
+- Reels: at least ${s.reels?.minSeconds || 40} s each, one topic per reel, lines may be reordered so it flows;
+  show the topic list before cutting
 `;
 }
 
@@ -89,11 +152,12 @@ createServer(async (req, res) => {
   try {
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, readFileSync(join(here, 'index.html')), 'text/html; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/api/state') {
-      return send(res, 200, { frames: frames(url.searchParams.has('refresh')).map((f) => `/frames/${f}`), styles: listStyles(), default: defaultSlug() });
+      const refresh = url.searchParams.has('refresh');
+      return send(res, 200, { frames: frames(refresh).map((f) => `/frames/${f}`), split: splitFrames(refresh).map((f) => `/frames/${f}`), styles: listStyles(), default: defaultSlug() });
     }
     if (req.method === 'GET' && url.pathname.startsWith('/frames/')) {
       const name = url.pathname.slice(8);
-      if (!/^frame-\d\.jpg$/.test(name) || !existsSync(join(cacheDir, name))) return send(res, 404, { error: 'no frame' });
+      if (!/^(frame-\d|split-screen|split-face)\.jpg$/.test(name) || !existsSync(join(cacheDir, name))) return send(res, 404, { error: 'no frame' });
       return send(res, 200, readFileSync(join(cacheDir, name)), 'image/jpeg');
     }
     if (req.method === 'GET' && url.pathname.startsWith('/api/styles/')) {

@@ -190,7 +190,15 @@ const TABS = ['Start', 'Colours', 'Fonts', 'Hook', 'Captions', 'Visuals', 'Extra
 
 // ---------------- state ----------------
 let S = structuredClone(SIGNATURE_GOLD);
-let tab = 0, visited = new Set([0]), frames = [], frameIdx = 0, saved = [], defaultSlug = null, dirty = true;
+let tab = 0, visited = new Set([0]), frames = [], splitFrames = [], frameIdx = 0, saved = [], defaultSlug = null, dirty = true;
+const FORMAT_NAME = { reels: 'Reels', split: 'Screen-share split' };
+async function loadStyle(slug) {
+  S = await (await fetch('/api/styles/' + slug)).json();
+  S.sample = { ...SIGNATURE_GOLD.sample, ...(S.sample || {}) };
+  if (S.layout) { S.colours.glow ||= '#2bd46a'; S.layout.cards.side ||= 'left'; S.layout.chipLabel ??= 'Mate Portal'; }
+  dirty = false; $('#saveState').textContent = 'Saved'; showName();
+}
+const showName = () => { $('#styleName').textContent = `${S.name || 'New style'} · ${FORMAT_NAME[isSplit(S) ? 'split' : 'reels']}`; };
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const slugify = (s) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'my-style';
@@ -263,7 +271,37 @@ function captionHTML(p, text) {
   const fit = text.length > k.maxChars ? Math.floor(size * k.maxChars / text.length) : size;
   return `<span style="font-size:${fit}px;${up ? 'text-transform:uppercase' : ''}">${inner}</span>`;
 }
+// Screen-share split: screen panel on top, speaker panel below, captions on the seam, chip and card on the
+// speaker panel (same coordinates as the format's build-reel.mjs)
+const isSplit = (p) => !!p.layout;
+function splitStage(container, p, scene, width) {
+  const sc = width / 1080, L = p.layout, c = p.colours, sm = p.sample;
+  const glass = 'background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 45%,rgba(255,255,255,.08));backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.45),0 30px 80px rgba(0,0,0,.55)';
+  const panel = (x, y, w, h, img, z, extra = '') => `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:30px;padding:10px;${glass};${extra}">
+    <div style="width:100%;height:100%;border-radius:21px;overflow:hidden;background:#000">${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover;transform:scale(${z});filter:${GRADES[p.visuals.grade]}">` : ''}</div></div>`;
+  const cardLeft = L.cards.side === 'right' ? 642 : 62; // right side still ends inside the safe zone (x 960)
+  const firstCap = captionChunks(p)[0] || '';
+  container.innerHTML = `<div class="stage" style="${vars(p)};transform:scale(${sc});background:radial-gradient(ellipse 70% 40% at 10% 0%,${hex2rgba(c.glow || '#2bd46a', .45)},transparent 70%),radial-gradient(ellipse 70% 40% at 100% 100%,${hex2rgba(c.accent, .3)},transparent 70%),#06070a">
+    ${panel(40, 196, 1000, 720, splitFrames[0], L.screen.zoom, `box-shadow:0 0 140px ${hex2rgba(c.glow || '#2bd46a', .18)},0 40px 120px rgba(0,0,0,.7)`)}
+    ${panel(40, 1040, 1000, 490, splitFrames[1], 1.02)}
+    <div style="position:absolute;left:66px;top:1066px;border-radius:999px;padding:12px 24px 12px 18px;display:flex;align-items:center;gap:12px;${glass}">
+      <span style="width:12px;height:12px;border-radius:50%;background:${c.glow || '#2bd46a'};box-shadow:0 0 14px ${c.glow || '#2bd46a'}"></span>
+      <div><div style="font:800 13px Inter;letter-spacing:3px;color:rgba(255,255,255,.62);text-transform:uppercase">${esc(L.chipLabel || '')}</div><div style="font:900 24px Inter;letter-spacing:-.5px">${esc(sm.titleA)}</div></div></div>
+    <div class="layer title" style="left:${cardLeft}px;right:auto;width:318px;top:1132px;display:block;border-radius:22px;padding:16px 20px 18px;${glass}">
+      <div style="font:800 13px Inter;letter-spacing:3px;color:rgba(255,255,255,.72);text-transform:uppercase">✦ ${esc(sm.cardEyebrow || 'Key point')}</div>
+      <div class="t" style="align-items:flex-start;text-align:left;margin-top:14px"><div class="hl" style="font-size:${Math.min(70, Math.round(278 / (String(sm.cardB || 'Speak').length * .58)))}px">${words(sm.cardB || 'Speak')}</div>
+      <div class="ac" style="font-size:${Math.min(46, Math.round(278 / (String(sm.cardI || '').length * .42 || 1)))}px;margin-top:-.12em;margin-left:6px">${words(sm.cardI || '')}</div></div></div>
+    <div class="cap stroke" style="top:918px;height:122px;align-items:center">${captionHTML(p, firstCap)}</div>
+    <div class="layer hook" style="top:0;height:1920px;background:linear-gradient(180deg,${hex2rgba(c.shade, 0)} 10%,${hex2rgba(c.shade, .62)} 32%,${hex2rgba(c.shade, .72)} 50%,${hex2rgba(c.shade, .62)} 68%,${hex2rgba(c.shade, 0)} 90%)"><div class="t" style="padding:0 40px">${titleHTML(p, sm.hookA, sm.hookB, sm.hookC, Math.min(1, 940 / (sm.hookA.length * .64 * p.fonts.headline.size)))}</div></div>
+  </div>`;
+  const st = container.firstElementChild;
+  if (scene === 'hook') st.querySelector('.hook').classList.add('show');
+  if (scene === 'title') st.querySelector('.title').classList.add('show');
+  if (scene !== 'hook') st.querySelector('.cap').classList.add('show');
+  return st;
+}
 function buildStage(container, p, scene, width) {
+  if (isSplit(p)) return splitStage(container, p, scene, width);
   const sc = width / 1080;
   const box = LAYOUT_BOX[p.visuals.titleLayout];
   const tb = backing(p, p.visuals.backing);
@@ -428,22 +466,35 @@ function bindText(id, set) { $('#' + id).oninput = (e) => { set(e.target.value);
 // ---------------- steps ----------------
 const STEPS = [
   () => {
-    const h = `<div class="eyebrow">Start</div><h2>Name your style</h2><p class="desc">Build a look for your shorts. Start from your current style or a saved one, pick a preview frame from your footage, and set sample text so every preview looks like your real video.</p>
-    <div class="fine" style="margin-top:0"><h4>Style</h4>
+    const split = isSplit(S);
+    const h = `<div class="eyebrow">Start</div><h2>Choose a style</h2><p class="desc">You have two formats. <b>Reels</b> is for talking-head shorts (titles and captions over your video). <b>Screen-share split</b> is for screen recordings: the screen on top, you always at the bottom. Pick a style to edit, or start a new one in either format.</p>
+    <div class="saved" style="margin-top:0">${saved.map((s) => `<div class="it" style="${s.slug === S.slug ? 'border-color:var(--brand)' : ''}"><span class="grow"><b>${esc(s.name)}</b> <span class="hint">${FORMAT_NAME[s.format] || 'Reels'} · ${s.updated || ''}</span></span>${s.slug === S.slug ? '<span class="tag" style="background:#fff">Editing</span>' : ''}${s.slug === defaultSlug ? '<span class="tag">Default</span>' : `<button class="btn" data-def="${s.slug}">Make default</button>`}<button class="btn ${s.slug === S.slug ? 'on' : ''}" data-load="${s.slug}">Edit</button></div>`).join('')}
+      <div class="it"><span class="grow"><b>New style</b> <span class="hint">start from a format</span></span><button class="btn" id="newReels">Reels</button><button class="btn" id="newSplit">Screen-share split</button></div></div>
+    <div class="fine"><h4>This style · ${FORMAT_NAME[split ? 'split' : 'reels']}</h4>
       ${field('Style name', text('fName', S.name))}
-      ${field('Start from', select('fFrom', [['', 'Keep current settings'], ['__sig', 'Signature Gold (your approved style)'], ...saved.map((s) => [s.slug, s.name])], ''))}
-      <h4>Preview frame</h4><div style="grid-column:1/-1" class="thumbs">${frames.map((f, i) => `<img src="${f}" data-f="${i}" class="${i === frameIdx ? 'on' : ''}">`).join('') || '<span class="hint">No video found in outbox or inbox yet. Previews use a plain background.</span>'}</div>
+      ${split ? '' : `<h4>Preview frame</h4><div style="grid-column:1/-1" class="thumbs">${frames.map((f, i) => `<img src="${f}" data-f="${i}" class="${i === frameIdx ? 'on' : ''}">`).join('') || '<span class="hint">No video found in outbox or inbox yet. Previews use a plain background.</span>'}</div>`}
+      ${split && !splitFrames.length ? '<span class="hint" style="grid-column:1/-1">No Screen-share split project yet, so the preview panels are empty.</span>' : ''}
       <h4>Sample text</h4>
       ${field('Hook headline', text('sA', S.sample.hookA))}${field('Hook accent line', text('sB', S.sample.hookB))}${field('Hook small line', text('sC', S.sample.hookC))}
-      ${field('Title', text('tA', S.sample.titleA))}${field('Title accent', text('tB', S.sample.titleB))}
+      ${split ? `${field('Topic', text('tA', S.sample.titleA))}${field('Card label', text('kE', S.sample.cardEyebrow || ''))}${field('Card word', text('kB', S.sample.cardB || ''))}${field('Card accent', text('kI', S.sample.cardI || ''))}`
+        : `${field('Title', text('tA', S.sample.titleA))}${field('Title accent', text('tB', S.sample.titleB))}`}
       <div class="field" style="grid-column:1/-1"><label>Caption sample <small>a few sentences of your talk</small></label>${text('cS', S.sample.caption)}</div>
     </div>`;
     return { h, bind() {
-      bindText('fName', (v) => { S.name = v; S.slug = slugify(v); $('#styleName').textContent = v || 'New style'; });
-      $('#fFrom').onchange = async (e) => { const v = e.target.value; if (!v) return; if (v === '__sig') S = structuredClone(SIGNATURE_GOLD); else S = await (await fetch('/api/styles/' + v)).json(); S.sample ||= structuredClone(SIGNATURE_GOLD.sample); touch(); go(0); toast('Loaded ' + S.name); };
+      bindText('fName', (v) => { S.name = v; S.slug = slugify(v); showName(); });
+      document.querySelectorAll('[data-load]').forEach((b) => b.onclick = async () => { await loadStyle(b.dataset.load); go(0); toast('Editing ' + S.name); });
+      document.querySelectorAll('[data-def]').forEach((b) => b.onclick = async () => { const r = await (await fetch('/api/default', { method: 'POST', body: JSON.stringify({ slug: b.dataset.def }) })).json(); defaultSlug = r.default; go(0); toast('Default set'); });
+      $('#newReels').onclick = () => { S = structuredClone(SIGNATURE_GOLD); S.name = 'New reels style'; S.slug = slugify(S.name); touch(); showName(); go(0); toast('New Reels style'); };
+      $('#newSplit').onclick = async () => {
+        if (!saved.some((s) => s.format === 'split')) return toast('No Screen-share split style to copy yet');
+        await loadStyle(saved.find((s) => s.slug === 'screen-share-split' || s.format === 'split').slug);
+        S.name = 'New split style'; S.slug = slugify(S.name); touch(); showName(); go(0); toast('New Screen-share split style');
+      };
       document.querySelectorAll('.thumbs img').forEach((im) => im.onclick = () => { frameIdx = +im.dataset.f; go(0); refreshBig(); });
       bindText('sA', (v) => S.sample.hookA = v); bindText('sB', (v) => S.sample.hookB = v); bindText('sC', (v) => S.sample.hookC = v);
-      bindText('tA', (v) => S.sample.titleA = v); bindText('tB', (v) => S.sample.titleB = v); bindText('cS', (v) => S.sample.caption = v);
+      bindText('tA', (v) => S.sample.titleA = v); bindText('cS', (v) => S.sample.caption = v);
+      if (split) { bindText('kE', (v) => S.sample.cardEyebrow = v); bindText('kB', (v) => S.sample.cardB = v); bindText('kI', (v) => S.sample.cardI = v); }
+      else bindText('tB', (v) => S.sample.titleB = v);
     } };
   },
   () => ({
@@ -472,7 +523,10 @@ const STEPS = [
       $('#fUp').onchange = (e) => { S.fonts.headline.upper = e.target.checked; touch(); };
     },
   }),
-  () => ({
+  () => isSplit(S) ? ({
+    h: `<div class="eyebrow">Step 3 · Hook</div><h2>The hook</h2><p class="desc">In Screen-share split the hook is fixed so every reel matches: a big word, an accent line, and a small question line, building in word by word for 4.6 seconds over the dimmed panels, with a riser into an impact. Each reel gets its own hook text when it is cut; change the sample text on the Start tab.</p>`,
+    bind() { bigScene = 'hook'; refreshBig(); const st = $('#bigPhone .stage'); animateIn(st.querySelector('.hook'), 'word-blur-rise', 'hook'); },
+  }) : ({
     h: `<div class="eyebrow">Step 3 · Hook</div><h2>Design the hook</h2><p class="desc">The text that stops the scroll in the first seconds. Click a card to watch it build in.</p>
       ${cardGrid(HOOK_LAYOUTS, null, 'hook', () => false)}
       <div class="fine"><h4>Motion and timing</h4>
@@ -489,7 +543,18 @@ const STEPS = [
       bigScene = 'hook'; refreshBig();
     },
   }),
-  () => ({
+  () => isSplit(S) ? ({
+    h: `<div class="eyebrow">Step 4 · Captions</div><h2>Style your captions</h2><p class="desc">In Screen-share split, captions sit on the seam between the screen and you, one line, and each word rises in as it's spoken.</p>
+      <div class="fine" style="margin-top:0"><h4>Fine-tune</h4>
+        ${field('Max characters per line', range('kC', 14, 32, 1, S.captions.maxChars))}${field('Size', range('kS', 40, 68, 2, S.captions.size, 'px'))}
+        ${field('Caption font', select('kF', [['Inter|800', 'Inter Extra Bold'], ['Montserrat|800', 'Montserrat'], ['Poppins|700', 'Poppins'], ['Anton|400', 'Anton'], ['Bebas Neue|400', 'Bebas Neue']], S.fonts.caption.family + '|' + S.fonts.caption.weight))}
+      </div>`,
+    bind() {
+      bindRange('kC', (v) => S.captions.maxChars = v); bindRange('kS', (v) => S.captions.size = v, 'px');
+      bindSelect('kF', (v) => { const [f, w] = v.split('|'); S.fonts.caption = { family: f, weight: +w }; });
+      bigScene = 'caption'; refreshBig();
+    },
+  }) : ({
     h: `<div class="eyebrow">Step 4 · Captions</div><h2>Style your captions</h2><p class="desc">How your words appear while you talk. Lines stay on one line and break at each new sentence.</p>
       ${cardGrid(CAPTIONS, null, 'caption', () => false)}
       <div class="fine"><h4>Fine-tune</h4>
@@ -508,7 +573,25 @@ const STEPS = [
       bigScene = 'caption'; refreshBig();
     },
   }),
-  () => ({
+  () => isSplit(S) ? ({
+    h: `<div class="eyebrow">Step 5 · Visuals</div><h2>Layout and look</h2><p class="desc">How close the screen share zooms in, which side of you the cards sit on, the label on the topic chip, and the glass glow. Everything stays inside the Reels/TikTok safe zone.</p>
+      <div class="fine" style="margin-top:0"><h4>Screen share</h4>
+        ${field('Zoom on the action', range('lZ', 1, 1.6, 0.05, S.layout.screen.zoom, 'x'), '1x shows the whole screen')}
+        <h4>Speaker panel</h4>
+        ${field('Cards sit', select('lS', [['left', 'Left of the speaker'], ['right', 'Right of the speaker']], S.layout.cards.side))}
+        ${field('Topic chip label', text('lC', S.layout.chipLabel || ''), 'small line above the topic')}
+        <h4>Look</h4>
+        ${field('Glass glow', `<input type="color" id="lG" value="${S.colours.glow || '#2bd46a'}">`)}
+        ${field('Colour grade', select('vG', [['natural', 'Natural'], ['warm', 'Warm'], ['cool', 'Cool'], ['bw', 'Black and white'], ['teal-orange', 'Teal and orange']], S.visuals.grade))}
+        ${field('Pace', select('vP', [['tight', 'Tight: cut every stutter, short breaths'], ['natural', 'Natural: keep short pauses']], S.visuals.pace))}
+      </div>`,
+    bind() {
+      bindRange('lZ', (v) => S.layout.screen.zoom = v, 'x'); bindSelect('lS', (v) => S.layout.cards.side = v); bindText('lC', (v) => S.layout.chipLabel = v);
+      $('#lG').oninput = (e) => { S.colours.glow = e.target.value; touch(); };
+      bindSelect('vG', (v) => S.visuals.grade = v); bindSelect('vP', (v) => S.visuals.pace = v);
+      bigScene = 'title'; refreshBig();
+    },
+  }) : ({
     h: `<div class="eyebrow">Step 5 · Visuals</div><h2>Titles and look</h2><p class="desc">Where section titles sit, what's behind them, how they move, and the colour grade of the footage.</p>
       ${cardGrid(MOTIONS, null, 'title', () => false)}
       <div class="fine"><h4>Titles</h4>
@@ -530,30 +613,39 @@ const STEPS = [
   () => ({
     h: `<div class="eyebrow">Step 6 · Extras</div><h2>Sound and call to action</h2><p class="desc">Sound effects timed to the text, the music bed under your voice, and the comment keyword. Press Play on the left to hear it.</p>
       ${cardGrid(SFX, null, 'title', () => false)}
-      <div class="fine"><h4>Music and CTA</h4>
-        ${field('Music', select('xM', [['my-sounds-or-pad', 'Track from my-sounds, else a generated pad'], ['pad', 'Generated ambient pad'], ['none', 'No music']], S.extras.music))}
+      <div class="fine"><h4>${isSplit(S) ? 'Music' : 'Music and CTA'}</h4>
+        ${isSplit(S) ? '' : field('Music', select('xM', [['my-sounds-or-pad', 'Track from my-sounds, else a generated pad'], ['pad', 'Generated ambient pad'], ['none', 'No music']], S.extras.music))}
         ${field('Music level under voice', range('xD', -30, -12, 1, S.extras.musicDb, ' dB'))}
-        ${field('Comment keyword', text('xK', S.extras.ctaKeyword))}
-        <label class="toggle"><input type="checkbox" id="xP" ${S.extras.ctaPops ? 'checked' : ''}> Pop sound on each spoken keyword</label>
+        ${isSplit(S) ? '' : `${field('Comment keyword', text('xK', S.extras.ctaKeyword))}
+        <label class="toggle"><input type="checkbox" id="xP" ${S.extras.ctaPops ? 'checked' : ''}> Pop sound on each spoken keyword</label>`}
       </div>`,
     bind() {
       bindCards(SFX, (p, o) => { p.extras.sfx = o.id; }, 'title', (o) => S.extras.sfx === o.id);
-      bindSelect('xM', (v) => S.extras.music = v); bindRange('xD', (v) => S.extras.musicDb = v, ' dB'); bindText('xK', (v) => S.extras.ctaKeyword = v);
-      $('#xP').onchange = (e) => { S.extras.ctaPops = e.target.checked; touch(); };
+      bindRange('xD', (v) => S.extras.musicDb = v, ' dB');
+      if (!isSplit(S)) {
+        bindSelect('xM', (v) => S.extras.music = v); bindText('xK', (v) => S.extras.ctaKeyword = v);
+        $('#xP').onchange = (e) => { S.extras.ctaPops = e.target.checked; touch(); };
+      }
     },
   }),
   () => {
     const c = S.colours, f = S.fonts, k = S.captions, v = S.visuals, x = S.extras, hk = S.hook;
     const h = `<div class="eyebrow">Step 7 · Watch</div><h2>Watch and save</h2><p class="desc">Press Play on the left to see the hook, a title, and captions together with sound. Save it, then tell your editor "edit this with ${esc(S.name)}".</p>
       <div class="summary">
-        <b>Colours</b><span>${esc(c.name)} · accent <span style="color:${c.accent}">■</span> ${c.accent}</span>
+        <b>Format</b><span>${FORMAT_NAME[isSplit(S) ? 'split' : 'reels']}</span>
+        <b>Colours</b><span>${esc(c.name)} · accent <span style="color:${c.accent}">■</span> ${c.accent}${isSplit(S) ? ` · glow <span style="color:${c.glow}">■</span> ${c.glow}` : ''}</span>
         <b>Fonts</b><span>${esc(f.headline.family)} + ${esc(f.accent.family)}${f.accent.italic ? ' italic' : ''}</span>
-        <b>Hook</b><span>${hk.layout}, ${hk.motion}, ${hk.minSeconds}-${hk.maxSeconds} s${hk.avoidAction ? ', avoids action' : ''}, ${hk.sound}</span>
+        ${isSplit(S) ? `<b>Hook</b><span>big word + accent line + question, 4.6 s, riser into impact</span>
+        <b>Captions</b><span>on the seam, max ${k.maxChars} chars, ${k.size}px, ${esc(f.caption.family)}</span>
+        <b>Layout</b><span>screen zoom ${S.layout.screen.zoom}x, cards ${S.layout.cards.side} of the speaker, chip "${esc(S.layout.chipLabel || '')}"</span>
+        <b>Look</b><span>${v.grade} grade, ${v.pace} pace</span>
+        <b>Sound</b><span>${x.sfx} SFX, music at ${x.musicDb} dB</span>`
+        : `<b>Hook</b><span>${hk.layout}, ${hk.motion}, ${hk.minSeconds}-${hk.maxSeconds} s${hk.avoidAction ? ', avoids action' : ''}, ${hk.sound}</span>
         <b>Captions</b><span>${k.style}, max ${k.maxChars} chars, ${k.size}px at y ${k.y}, ${esc(f.caption.family)}</span>
         <b>Titles</b><span>${v.titleLayout}, ${v.backing}, ${v.motion}, hold ${v.titleMinHold} s+</span>
         <b>Look</b><span>${v.grade} grade, ${v.pace} pace, zooms ${v.punchIns}</span>
         <b>Sound</b><span>${x.sfx} SFX, music ${x.music} at ${x.musicDb} dB</span>
-        <b>CTA</b><span>"${esc(x.ctaKeyword)}"${x.ctaPops ? ' with pops' : ''}</span>
+        <b>CTA</b><span>"${esc(x.ctaKeyword)}"${x.ctaPops ? ' with pops' : ''}</span>`}
       </div>
       <div class="fine"><h4>Save</h4>
         ${field('Style name', text('wN', S.name))}
@@ -562,10 +654,10 @@ const STEPS = [
       </div>
       <div class="saved">${saved.map((s) => `<div class="it"><span class="grow"><b>${esc(s.name)}</b> <span class="hint">${s.updated || ''}</span></span>${s.slug === defaultSlug ? '<span class="tag">Default</span>' : `<button class="btn" data-def="${s.slug}">Make default</button>`}<button class="btn" data-load="${s.slug}">Edit</button></div>`).join('')}</div>`;
     return { h, bind() {
-      bindText('wN', (v) => { S.name = v; S.slug = slugify(v); $('#wSlug').textContent = `styles/${S.slug}.json`; $('#styleName').textContent = v; });
+      bindText('wN', (v) => { S.name = v; S.slug = slugify(v); $('#wSlug').textContent = `styles/${S.slug}.json`; showName(); });
       $('#wSave').onclick = save;
       document.querySelectorAll('[data-def]').forEach((b) => b.onclick = async () => { const r = await (await fetch('/api/default', { method: 'POST', body: JSON.stringify({ slug: b.dataset.def }) })).json(); defaultSlug = r.default; go(7); toast('Default set'); });
-      document.querySelectorAll('[data-load]').forEach((b) => b.onclick = async () => { S = await (await fetch('/api/styles/' + b.dataset.load)).json(); S.sample ||= structuredClone(SIGNATURE_GOLD.sample); $('#styleName').textContent = S.name; go(1); toast('Editing ' + S.name); });
+      document.querySelectorAll('[data-load]').forEach((b) => b.onclick = async () => { await loadStyle(b.dataset.load); go(1); toast('Editing ' + S.name); });
     } };
   },
 ];
@@ -596,9 +688,9 @@ window.addEventListener('resize', () => renderCards());
 
 (async () => {
   const st = await (await fetch('/api/state')).json();
-  frames = st.frames; saved = st.styles; defaultSlug = st.default;
-  if (defaultSlug) { try { S = await (await fetch('/api/styles/' + defaultSlug)).json(); S.sample ||= structuredClone(SIGNATURE_GOLD.sample); dirty = false; $('#saveState').textContent = 'Saved'; } catch {} }
-  $('#styleName').textContent = S.name;
+  frames = st.frames; splitFrames = st.split || []; saved = st.styles; defaultSlug = st.default;
+  if (defaultSlug) { try { await loadStyle(defaultSlug); } catch {} }
+  showName();
   await document.fonts.ready;
   go(0);
 })();
