@@ -7,4 +7,4 @@ http://localhost:4747). Each style is saved twice:
 - `<slug>.md`: the same values as plain bullets, for the editor to read.
 
 `DEFAULT` holds the slug used when you just say "edit this". Say "edit this with <style name>" to
-use another one. Everything here except this README stays on your computer (see `.gitignore`).
+use another one. Saved styles are kept in the repo; only `.cache/` (preview frames) stays on your computer.

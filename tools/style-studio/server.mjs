@@ -98,13 +98,13 @@ Saved from Style Studio ${s.updated}. Machine-readable values: \`styles/${s.slug
 - Format: ${s.format}
 - Colours (${c.id}): headline gradient ${c.primary} to ${c.primaryEnd}, accent ${c.accent}, captions ${c.caption}, shade ${c.shade}
 - Fonts (${f.id}): headline ${f.headline.family} ${f.headline.weight}${f.headline.upper ? ' UPPERCASE' : ''}, tracking ${f.headline.tracking}em; accent ${f.accent.family} ${f.accent.italic ? 'italic ' : ''}${f.accent.weight}; small line ${f.body.family} ${f.body.weight}; captions ${f.caption.family} ${f.caption.weight}
-- Hook: ${h.layout} layout, ${h.motion} motion, on screen ${h.minSeconds}-${h.maxSeconds} s${h.avoidAction ? ', ends early if it would cover action' : ''}; sound ${h.sound}
-- Captions: ${k.style}, max ${k.maxChars} characters, one line${k.highlight ? ', key word in accent' : ''}, ${k.position} (y ${k.y}), ${k.size}px${k.box ? ', dark box' : ', stroke + shadow'}
-- Titles: ${v.titleLayout}, backing ${v.backing}, ${v.motion} motion, fully on screen at least ${v.titleMinHold} s (+0.3 s per word past 3)
+- Hook: ${h.layout === 'none' ? 'none, no hook text; start straight into the video' : `${h.layout} layout, ${h.motion} motion, on screen ${h.minSeconds}-${h.maxSeconds} s${h.avoidAction ? ', ends early if it would cover action' : ''}; sound ${h.sound}`}
+- Captions: ${k.style === 'none' ? 'none' : `${k.style}, max ${k.maxChars} characters, one line${k.highlight ? ', key word in accent' : ''}, ${k.position} (y ${k.y}), ${k.size}px${k.box ? ', dark box' : ', stroke + shadow'}`}
+- Titles: ${v.titleLayout === 'none' ? 'none, no section titles or cards' : `${v.titleLayout}, backing ${v.backing}, ${v.motion} motion, fully on screen at least ${v.titleMinHold} s (+0.3 s per word past 3)`}
 - Look: grade ${v.grade}, pace ${v.pace}, punch-in zooms ${v.punchIns}
-- Sound: SFX ${x.sfx}; music ${x.music} about ${Math.abs(x.musicDb)} dB under the voice, ducked under speech
-- CTA: keyword "${x.ctaKeyword}"${x.ctaPops ? ', pop on each spoken keyword' : ''}
-`;
+- Sound: ${x.sfx === 'none' ? 'no sound effects' : `SFX ${x.sfx}`}; ${x.music === 'none' ? 'no music, voice only' : `music ${x.music} about ${Math.abs(x.musicDb)} dB under the voice, ducked under speech`}
+- CTA: ${x.ctaKeyword ? `keyword "${x.ctaKeyword}"${x.ctaPops ? ', pop on each spoken keyword' : ''}` : 'none'}
+${s.note ? `\n${s.note}\n` : ''}`;
 }
 
 // Screen-share split: the layout values the format's build-reel.mjs reads, in plain words
@@ -147,10 +147,17 @@ const readBody = (req) => new Promise((ok, bad) => {
   req.on('end', () => ok(b));
 });
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   try {
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, readFileSync(join(here, 'index.html')), 'text/html; charset=utf-8');
+    if (req.method === 'GET' && url.pathname === '/api/hello') return send(res, 200, { app: 'style-studio', pid: process.pid });
+    // a newer Style Studio asks this one to step aside; the custom header keeps web pages from doing it
+    if (req.method === 'POST' && url.pathname === '/api/quit' && req.headers['x-style-studio'] === 'replace') {
+      send(res, 200, { ok: true });
+      console.log('A newer Style Studio started; closing this one.');
+      return server.close(() => process.exit(0));
+    }
     if (req.method === 'GET' && url.pathname === '/api/state') {
       const refresh = url.searchParams.has('refresh');
       return send(res, 200, { frames: frames(refresh).map((f) => `/frames/${f}`), split: splitFrames(refresh).map((f) => `/frames/${f}`), styles: listStyles(), default: defaultSlug() });
@@ -185,4 +192,37 @@ createServer(async (req, res) => {
   } catch (e) {
     send(res, 500, { error: String(e.message || e) });
   }
-}).listen(PORT, '127.0.0.1', () => console.log(`Style Studio: http://localhost:${PORT}  (styles saved to ${stylesDir})`));
+});
+server.on('listening', () => console.log(`Style Studio: http://localhost:${server.address().port}  (styles saved to ${stylesDir})`));
+
+// Only one Style Studio at a time, so the page never shows old code: if the port is taken by another Style
+// Studio it is asked to close; one from before this check existed can't be, so this one says how to close
+// it and opens on the next free port. Anything else on the port is left alone.
+const ask = (port, path, opts = {}) => fetch(`http://127.0.0.1:${port}${path}`, { ...opts, signal: AbortSignal.timeout(1500) }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+function holder(port) { // the process id listening on the port, when the system can tell
+  const win = process.platform === 'win32';
+  const out = spawnSync(win ? 'netstat' : 'lsof', win ? ['-ano', '-p', 'TCP'] : ['-ti', `tcp:${port}`, '-sTCP:LISTEN'], { encoding: 'utf8' }).stdout || '';
+  return win ? out.split('\n').find((l) => l.includes(`:${port} `) && /LISTENING/.test(l))?.trim().split(/\s+/).pop() : out.trim().split('\n')[0];
+}
+function listen(port, tries = 0) {
+  const onError = async (e) => {
+    if (e.code !== 'EADDRINUSE' || port > PORT + 20) throw e;
+    if (tries === 0 && (await ask(port, '/api/hello'))?.app === 'style-studio') {
+      await ask(port, '/api/quit', { method: 'POST', headers: { 'X-Style-Studio': 'replace' } });
+      return setTimeout(() => listen(port, 1), 400);
+    }
+    if (tries > 0 && tries < 8) return setTimeout(() => listen(port, tries + 1), 400);
+    if (port === PORT) {
+      const old = (await ask(port, '/api/state'))?.styles, pid = holder(port);
+      console.log(old
+        ? `An older Style Studio is still open on port ${port}${pid ? ` (process ${pid})` : ''} and can't be closed from here.`
+          + (pid ? ` To close it: Task Manager > Details > node.exe with PID ${pid} > End task, or run: ${process.platform === 'win32' ? `taskkill /PID ${pid} /F` : `kill ${pid}`}` : '')
+        : `Port ${port} is used by another program${pid ? ` (process ${pid})` : ''}; leaving it alone.`);
+    }
+    listen(port + 1);
+  };
+  server.once('error', onError);
+  server.once('listening', () => server.off('error', onError));
+  server.listen(port, '127.0.0.1');
+}
+listen(PORT);

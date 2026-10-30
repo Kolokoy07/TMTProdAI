@@ -65,7 +65,7 @@ node tools/style-studio/server.mjs
 ```
 
 Then open http://localhost:4747 (or ask your agent to "open Style Studio"). Saved styles go to
-`styles/` and stay on your computer. Pick one as the default, or say **"edit this with
+`styles/` and are kept in the repo. Pick one as the default, or say **"edit this with
 <style name>"** to use a different one for a video.
 
 ## What it does
@@ -137,7 +137,8 @@ TMTProdAI/
   kit/               the editing engine (installed by setup)
 ```
 
-Your footage, renders, style, rules, and key are in `.gitignore` and never leave your computer.
+Your footage, renders, and key are in `.gitignore` and never leave your computer. Your style
+(`my-style.md`), rules (`my-rules.md`), and saved `styles/` are kept in the repo so they follow you.
 
 ## Updating the engine
 

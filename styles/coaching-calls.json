@@ -1,0 +1,76 @@
+{
+  "name": "Coaching Calls",
+  "slug": "coaching-calls",
+  "format": "9:16 1080x1920",
+  "use": "Zoom/Meet coaching calls for students and traders (camera tiles plus chart screen-shares) cut into many short clips",
+  "colours": {
+    "background": "#000000",
+    "hook": "#FFFFFF",
+    "hookBox": "#E3161D",
+    "caption": "#FFFFFF",
+    "captionBox": "#000000"
+  },
+  "hook": {
+    "font": "Arial Black",
+    "size": 72,
+    "pad": 12,
+    "bottom": 1300,
+    "lines": "2-3 short lines, max ~18 characters each",
+    "upper": true,
+    "motion": "none",
+    "hold": "4.5 s from the start, always under 5 s",
+    "seconds": 4.5,
+    "placement": "on the video, over the speaker's chest, under the face",
+    "note": "white caps on a red box per line, like the user's reference; never animated; short and plain"
+  },
+  "captions": {
+    "font": "Arial Black",
+    "size": 50,
+    "y": 1450,
+    "maxChars": 24,
+    "upper": true,
+    "box": true
+  },
+  "layout": {
+    "camera": {
+      "size": 1080,
+      "y": 420,
+      "cx": 0.47,
+      "note": "square crop of the speaker, full width"
+    },
+    "chart": {
+      "y": 640,
+      "note": "whole screen-share at full 1080 width, never cropped or split, so prices and candles stay readable"
+    },
+    "split": "only for screen-share scenes (chart on top, webcam below); camera scenes stay single full-width",
+    "safeZone": "hook and captions above y 1530 and left of the right-edge button column",
+    "share": {
+      "chartY": 400,
+      "camY": 1250,
+      "camSize": 420,
+      "capY": 1205,
+      "note": "screen-share scenes: chart crop full width on top, the coach webcam enlarged below, captions between; used when the share is on"
+    }
+  },
+  "cuts": {
+    "maxGap": 0.35,
+    "padIn": 0.06,
+    "padOut": 0.12,
+    "speedUps": false
+  },
+  "extras": {
+    "sfx": "none",
+    "music": "none"
+  },
+  "clips": {
+    "lengthSeconds": "60-110, never under 60",
+    "pick": "only the best teaching and inspirational moments, ranked with styles/coaching-calls/clip-selection-prompt.md",
+    "hooks": "the student's problem or question whenever possible",
+    "template": "styles/coaching-calls/"
+  },
+  "makeDefault": false,
+  "updated": "2026-10-26",
+  "privacy": {
+    "studentSurnames": "blur (name tiles, camera labels, captions); first names and coaches stay"
+  }
+}

@@ -16,6 +16,7 @@ editing or coding terms. Run every command from the repo root unless a step says
 | `setup.mjs` | One-time setup. Safe to re-run. |
 | `tools/transcribe.mjs` | Free word-level transcription (Groq, or `--local` faster-whisper). |
 | `inbox/` | Raw videos the user wants edited. |
+| `inbox/broll/` | B-roll clips. Never the main video; use them as B-roll in the edit. |
 | `outbox/` | Every draft and final you render, named `<slug>-v1.mp4`, `<slug>-final.mp4`. |
 | `my-style.md` | The user's style, written during style setup. |
 | `styles/` | Named styles saved from Style Studio: `<slug>.json` (exact values) and `<slug>.md`; `DEFAULT` names the default. |
@@ -90,8 +91,10 @@ one per choice, in the user's words where they gave them.
 
 Style Studio builds named looks with a tab per part: Colours, Fonts, Hook, Captions, Visuals,
 Extras, Watch. To open it, run `node tools/style-studio/server.mjs` in the background and open
-http://localhost:4747 (the Claude app's browser pane, or `start http://localhost:4747`). The user
-picks options there; you do not edit `styles/` files by hand unless they ask.
+http://localhost:4747 (the Claude app's browser pane, or `start http://localhost:4747`). A new start
+closes any Style Studio already running; if an older one can't be closed it prints how to close it
+and uses the next free port, so open the address it prints. The user picks options there; you do not
+edit `styles/` files by hand unless they ask.
 
 Choosing a style for an edit: the style the user names ("with Punchy Orange"), else the slug in
 `styles/DEFAULT`, else `my-style.md` alone. Read the style's `.md` for intent and its `.json` for
@@ -107,7 +110,7 @@ silence and mistake cuts, design, preview, and draft render. Do not stop for app
 steps. Ask first only for anything that costs money or uploads elsewhere (ElevenLabs, Kie.ai,
 any other paid API). The default is to use none of them.
 
-1. Find the source: the path in the message, or else the newest video in `inbox/` that has no
+1. Find the source: the path in the message, or else the newest video directly in `inbox/` (never in `inbox/broll/`) that has no
    output yet. If the user attached a video but you cannot see a file path, ask them to put it
    in `inbox/`. Make a slug from the file name plus today's date.
 2. From `kit/`: `npm run new-video -- <slug>`. Copy the source to
@@ -120,7 +123,8 @@ any other paid API). The default is to use none of them.
    the chosen style; the chosen style beats `my-style.md`; both beat the kit's house style.
 5. Read `kit/AGENTS.md`, then follow the kit skill `short-form-edit` for vertical or short
    videos (under 3 minutes) or `edit-video` for long horizontal ones. Use the user's own
-   footage. Extra clips in `inbox/` that the user calls B-roll are B-roll. Use `my-sounds/` for
+   footage. Clips in `inbox/broll/` are B-roll, and so are extra clips in `inbox/` that the user calls B-roll;
+   use the ones that fit what is being said, and say which you used. Use `my-sounds/` for
    music and effects; if it is empty, synthesize simple effects with FFmpeg or skip them. Never
    download music or footage you have no right to use, and never generate assets with paid
    services unasked.

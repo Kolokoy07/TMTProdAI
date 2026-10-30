@@ -1,0 +1,84 @@
+{
+  "name": "Signature Gold",
+  "slug": "signature-gold",
+  "format": "9:16 1080x1920",
+  "colours": {
+    "id": "gold",
+    "name": "Gold & White",
+    "note": "White headline, gold accent",
+    "primary": "#ffffff",
+    "primaryEnd": "#b9b9b9",
+    "accent": "#f5c84c",
+    "caption": "#ffffff",
+    "shade": "#06070a"
+  },
+  "fonts": {
+    "id": "signature",
+    "name": "Signature",
+    "note": "Tight sans + elegant italic serif",
+    "headline": {
+      "family": "Inter",
+      "weight": 900,
+      "tracking": -0.042,
+      "upper": false,
+      "size": 168
+    },
+    "accent": {
+      "family": "Instrument Serif",
+      "italic": true,
+      "weight": 400,
+      "size": 132
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 800
+    },
+    "caption": {
+      "family": "Inter",
+      "weight": 800
+    }
+  },
+  "hook": {
+    "layout": "stacked",
+    "motion": "word-blur-rise",
+    "minSeconds": 4,
+    "maxSeconds": 5,
+    "avoidAction": true,
+    "sound": "riser-impact"
+  },
+  "captions": {
+    "style": "sentence-line",
+    "maxChars": 26,
+    "position": "above-seam",
+    "y": 1300,
+    "size": 56,
+    "highlight": false,
+    "box": false
+  },
+  "visuals": {
+    "titleLayout": "center-band",
+    "backing": "soft-band",
+    "motion": "word-blur-rise",
+    "titleMinHold": 3,
+    "grade": "natural",
+    "pace": "tight",
+    "punchIns": "off"
+  },
+  "extras": {
+    "sfx": "premium",
+    "music": "my-sounds-or-pad",
+    "musicDb": -20,
+    "ctaKeyword": "ACTIVATE",
+    "ctaPops": true
+  },
+  "sample": {
+    "hookA": "5 Levels",
+    "hookB": "of thinking",
+    "hookC": "sa trading. Anong level ka na?",
+    "titleA": "Level 3",
+    "titleB": "strategy hopping",
+    "caption": "Sa level 3, narealize mo na hindi pala nag-work yung strategy mo. Pero kasi sa totoo lang, hindi mo lang siguro nabigyan ng time and focus."
+  },
+  "makeDefault": true,
+  "updated": "2026-10-25 18:11"
+}

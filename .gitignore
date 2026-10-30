@@ -2,7 +2,7 @@
 kit/
 node_modules/
 
-# Your footage, renders, style, rules, and keys stay local
+# Your footage, renders, and keys stay local (style, rules, and styles/ are tracked)
 .env
 inbox/*
 outbox/*
@@ -10,10 +10,7 @@ my-sounds/*
 !inbox/.gitkeep
 !outbox/.gitkeep
 !my-sounds/.gitkeep
-my-style.md
-my-rules.md
-styles/*
-!styles/README.md
+styles/.cache/
 *.transcribe.mp3
 
 # Sync tools
