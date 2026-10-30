@@ -19,6 +19,7 @@ editing or coding terms. Run every command from the repo root unless a step says
 | `inbox/broll/` | B-roll clips. Never the main video; use them as B-roll in the edit. |
 | `outbox/` | Every draft and final you render, named `<slug>-v1.mp4`, `<slug>-final.mp4`. |
 | `my-style.md` | The user's style, written during style setup. |
+| `luts/` | The user's colour LUTs (`.cube`), named in `my-rules.md`. |
 | `styles/` | Named styles saved from Style Studio: `<slug>.json` (exact values) and `<slug>.md`; `DEFAULT` names the default. |
 | `tools/style-studio/` | Style Studio, the local style picker (`node tools/style-studio/server.mjs`, port 4747). |
 | `my-rules.md` | Lasting rules learned from the user's notes. |
@@ -147,4 +148,6 @@ any other paid API). The default is to use none of them.
 
 - Post, upload, or send a video anywhere.
 - Print or log the Groq key.
-- Commit or publish anything in `inbox/`, `outbox/`, `my-style.md`, `my-rules.md`, or `my-sounds/`.
+- Commit or publish anything in `inbox/`, `outbox/`, `my-sounds/`, or `.env`. `my-style.md`, `my-rules.md`,
+  `styles/`, and `luts/` are shared with the user's editors through the repo; commit them only when the
+  user asks.

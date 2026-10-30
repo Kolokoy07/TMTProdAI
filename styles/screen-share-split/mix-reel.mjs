@@ -18,7 +18,10 @@ const ff = (args) => {
   return r.stderr;
 };
 if (!existsSync(join(S, 'riser.wav'))) {
-  for (const s of ['impact', 'swish', 'shimmer', 'swell', 'pop', 'pad', 'whoosh', 'riser']) copyFileSync(join(SOUNDS, `${s}.wav`), join(S, `${s}.wav`));
+  for (const s of ['impact', 'swish', 'shimmer', 'swell', 'pop', 'pad', 'whoosh', 'riser']) {
+    const f = s === 'pad' ? 'pad.m4a' : `${s}.wav`; // the pad is long, so it ships compressed
+    copyFileSync(join(SOUNDS, f), join(S, f));
+  }
 }
 const lufs = (file) => (spawnSync('ffmpeg', ['-hide_banner', '-i', file, '-af', 'ebur128', '-f', 'null', '-'], { encoding: 'utf8', maxBuffer: 1 << 26 }).stderr.match(/I:\s+(-?[\d.]+) LUFS\s*\n\s*Threshold[\s\S]*$/) || [, NaN])[1];
 
@@ -26,7 +29,7 @@ for (const id of process.argv.slice(2)) {
   const A = join(here, 'assets', id);
   const { duration: DUR, cues, musicDb = -20, music } = JSON.parse(readFileSync(join(A, 'cues.json'), 'utf8'));
   ff(['-i', join(A, 'clip.mp4'), '-vn', '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11', '-ar', '48000', '-ac', '2', join(A, 'voice.wav')]);
-  ff(['-ss', String((+id.slice(1) * 11) % 300), '-i', join(S, 'pad.wav'), '-t', String(DUR), '-af', `afade=t=in:d=1.5,afade=t=out:st=${DUR - 1.5}:d=1.5`, join(A, 'pad.wav')]);
+  ff(['-ss', String((+id.slice(1) * 11) % 300), '-i', join(S, existsSync(join(S, 'pad.m4a')) ? 'pad.m4a' : 'pad.wav'), '-t', String(DUR), '-af', `afade=t=in:d=1.5,afade=t=out:st=${DUR - 1.5}:d=1.5`, join(A, 'pad.wav')]);
   const snds = [...new Set(cues.map((c) => c.snd))]; // empty when the style's SFX is none
   const inputs = ['-i', join(A, 'voice.wav'), '-i', join(A, 'pad.wav'), ...snds.flatMap((s) => ['-i', join(S, `${s}.wav`)])];
   // the pad sits about musicDb under the voice (0.55 is the approved -20 dB level)

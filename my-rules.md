@@ -52,7 +52,7 @@
   "you can ask me from start also if it is a long form, short, ads, it has different export settings ok" (2026-10-28)
   "can you export it to 4k?" (2026-10-28, long-form)
 - Long-form videos: grade only the camera footage with the user's LUT
-  `C:\Users\Gian\Documents\long form trial LUT_2.C0370.cube` (copied into Resolve's LUT folder under
+  `luts/long-form.cube` (the user's "long form trial LUT_2"; also copied into Resolve's LUT folder under
   TMTProdAI). Never grade screen recordings or screen shares.
   "use this lut" / "you can use it for all long forms for now" (2026-10-28)
   "the screenshare should not be graded just the camera sourced ones" (2026-10-28)

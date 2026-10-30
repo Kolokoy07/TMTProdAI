@@ -16,8 +16,7 @@ future edit, so it learns your style.
 ### One prompt
 
 Open your agent in any folder (for example `claude` or `codex` in a terminal, or a new chat
-in Cursor or Antigravity) and paste the prompt below. The repository is private, so you need
-access to it on GitHub first.
+in Cursor or Antigravity) and paste the prompt below.
 
 ```text
 Set up TMTProdAI for me. Clone https://github.com/Kolokoy07/TMTProdAI.git into my
@@ -41,6 +40,21 @@ Claude desktop app works too: in its Code tab, pick Local and the folder.
    `codex`. In Cursor, Antigravity, or Windsurf, open the folder as the workspace.
 3. **Type `start`.** The agent checks your computer, installs what is missing (with your OK),
    renders a test video, and asks a few questions about your style.
+
+## For editors
+
+This repo carries the house look, so every editor's agent edits the same way:
+
+- `my-rules.md`: every lasting rule from past notes. It beats everything else.
+- `styles/`: the named styles (Signature Gold is the default, see `styles/DEFAULT`), plus
+  Screen-share split and Coaching Calls with their scripts and sounds.
+- `my-style.md`: the base style under them.
+- `luts/long-form.cube`: the colour LUT for long-form camera footage.
+
+Set up with the prompt above. Setup sees that `my-style.md` already exists and skips the style
+questions. Before each edit, run `git pull` in the `TMTProdAI` folder to get the latest rules
+and styles. If your agent adds a rule from your notes, send it to the owner instead of keeping it
+only on your computer, so it reaches everyone.
 
 ## Editing
 
@@ -130,15 +144,17 @@ TMTProdAI/
   tools/             free transcription and Style Studio
   inbox/             your raw videos
   outbox/            drafts and finals
-  styles/            named styles saved from Style Studio (stay private)
-  my-style.md        your style (created at setup, stays private)
-  my-rules.md        rules learned from your notes (stays private)
+  styles/            named styles saved from Style Studio
+  luts/              colour LUTs named in my-rules.md
+  my-style.md        your style (created at setup)
+  my-rules.md        rules learned from your notes
   my-sounds/         your music and sound effects
   kit/               the editing engine (installed by setup)
 ```
 
 Your footage, renders, and key are in `.gitignore` and never leave your computer. Your style
-(`my-style.md`), rules (`my-rules.md`), and saved `styles/` are kept in the repo so they follow you.
+(`my-style.md`), rules (`my-rules.md`), saved `styles/`, and `luts/` are kept in the repo, which is
+public, so your editors use them too.
 
 ## Updating the engine
 
