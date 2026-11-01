@@ -4,10 +4,11 @@ Built with the user on the Coach Tim Mate Portal reels (2026-10-25/26). Machine-
 `styles/screen-share-split.json`. Scripts and sounds: `styles/screen-share-split/` (see its README).
 
 Use for: screen recordings that have the speaker in a camera bubble (tutorials, platform walkthroughs),
-cut into educational reels. Talking-head reels keep using the default style (Organic Ad style).
+cut into educational reels. Talking-head reels use Signature Gold (the default).
 
 - Format: 9:16 1080x1920, split screen. Screen share on top (1000x720 glass window), the speaker
-  always in the bottom panel (1000x490), captions on the seam between them.
+  always in the bottom panel (1000x490), captions on the seam between them. For ads and new split
+  edits the rule in `my-rules.md` wins: no borders on either video, speaker zoomed to fill the bottom half.
 - Speaker panel: the camera bubble cropped from the 4K recording, following it to whichever corner it
   is in; the bubble inside the screen share is covered so the speaker never shows twice. Full-screen
   camera shots show the speaker centred below and a glass title card on top.

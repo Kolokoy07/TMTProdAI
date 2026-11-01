@@ -1,10 +1,10 @@
 # My style
 
 - Format: vertical 9:16 (Reels, TikTok, Shorts)
-- Captions: full-sentence subtitles
-- Caption position: lower third
+- Captions: short one-line subtitles (see my-rules.md)
+- Caption position: above the Reels/TikTok safe zone (never in the bottom ~390 px)
 - Caption colors: white with shadow
-- Hook: big hook text in the first 3 seconds
+- Hook: big hook text at the start, 4 s to just under 5 s
 - Title fonts: cinematic pairing like the user's "Cinematic fonts" reference (2026-10-25): a heavy,
   tightly spaced sans word with a soft white-to-silver gradient (Inter Black), an overlapping
   lowercase italic serif (Instrument Serif Italic) in gold (#f5c84c, option C picked 2026-10-25),
