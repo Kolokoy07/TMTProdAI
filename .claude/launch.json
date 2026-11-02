@@ -6,6 +6,18 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["tools/style-studio/server.mjs"],
       "port": 4747
+    },
+    {
+      "name": "outbox-deck",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-m", "http.server", "4848", "--bind", "127.0.0.1", "--directory", "outbox"],
+      "port": 4848
+    },
+    {
+      "name": "mateportal-ad-studio",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--prefix", "kit/video-projects/mateportal-saas-ad-2026-10-31", "hyperframes", "preview", "kit/video-projects/mateportal-saas-ad-2026-10-31", "--port", "4571"],
+      "port": 4571
     }
   ]
 }
