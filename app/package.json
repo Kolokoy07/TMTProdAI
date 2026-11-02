@@ -1,0 +1,14 @@
+{
+  "name": "tmtprodai-app",
+  "private": true,
+  "version": "0.1.0",
+  "description": "TMTProdAI for Windows: drop a video, get an edited draft, give notes, approve.",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

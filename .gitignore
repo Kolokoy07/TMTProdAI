@@ -2,6 +2,10 @@
 kit/
 node_modules/
 
+# The Windows app's build output
+app/src-tauri/target/
+app/src-tauri/gen/
+
 # Your footage, renders, and keys stay local (style, rules, and styles/ are tracked)
 .env
 inbox/*
