@@ -31,10 +31,6 @@ TMTProdAI folder from now on.
 
 From then on, open your agent in the `TMTProdAI` folder so it finds the skill. The
 Claude desktop app works too: in its Code tab, pick Local and the folder.
-
-On Windows there's also a desktop app: drop a video on its window, watch the progress, play
-the draft, send notes and approve. It uses your own Claude Code. See [app/README.md](app/README.md).
-
 ### Step by step
 
 1. **Get it.** `git clone https://github.com/Kolokoy07/TMTProdAI.git`, or use
