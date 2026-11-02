@@ -1,8 +1,17 @@
 # Coaching Calls: clip selection prompt
 
 The user's prompt for picking clips (given 2026-10-26). Use it on every coaching-call transcript.
-House overrides: every clip is at least 60 seconds (this beats "20-60 seconds" below), and only the best
-teaching and inspirational moments make it. Write the result to `outbox/<slug>/<slug>-clip-report.md`.
+House overrides (they beat the prompt below):
+- Every clip is at least 1:30 (90 seconds; this beats "20-60 seconds" below), and only the best teaching and
+  inspirational moments make it.
+- Every clip holds the whole arc: the student's problem and the coach's solution, ending on the payoff. Drop a
+  moment rather than cut it off before the solution.
+- For every clip, also give: **Problem** (one line, the student's struggle) and **Coach's solution** (one line,
+  the fix or rule the coach gives).
+- On-screen hook: give 2-3 options of 2-3 short lines each, written with the curiosity formulas in
+  `styles/coaching-calls.md` ("This is how...", "How a trader...", "Why you keep..."). The spoken opening still
+  uses the student's exact words.
+Write the result to `outbox/<slug>/<slug>-clip-report.md`.
 
 ---
 

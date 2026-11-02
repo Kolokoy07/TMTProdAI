@@ -11,7 +11,7 @@ apply to; "Every edit" applies to all of them.
 | Talking-head reels | Signature Gold (`styles/DEFAULT`) | Default for "edit this" |
 | Screen recordings with a camera bubble, cut into reels | Screen-share split (`styles/screen-share-split.md`) | Plain versions: Simple split, Simple split (no hook) |
 | Ads for a product (for example the MATE Portal ads) | Screen-share split look, split screen | Follow the user's script |
-| Coaching calls to students and traders | Coaching Calls (`styles/coaching-calls.md`) | |
+| Coaching calls to students and traders | Coaching Calls (`styles/coaching-calls.md`) | Split screen for charts and student talking |
 | Horizontal lessons and episodes | Long-form rules below | No style file |
 
 - Keep the formats separate. Split-screen layout, screen zoom-ins, and small cards beside the speaker
@@ -55,16 +55,25 @@ apply to; "Every edit" applies to all of them.
 
 ## Coaching Calls
 
-- Make as many clips as the call allows. No split screen. Show chart screen-shares whole at full width so
-  they can be read.
+- Make as many clips as the call allows. Chart screen-shares stay readable.
   "make a new style for this types of clippings call it coaching calls, insert simple text hooks with every video no need animated. as long as it has high contrast." (2026-10-26)
-- Each clip runs at least 1 minute and holds only the best teaching and inspirational moments. Pick them
-  with `styles/coaching-calls/clip-selection-prompt.md`, and open on the student's problem or question
-  when possible. The 60-second minimum beats the prompt's 20-60 s.
+- Split screen while the coach shows charts (chart on top, coach below) and while the student talks
+  (student on top, coach below). Only the coach talking on camera stays a single full-width shot. This
+  replaces the earlier "no split screen" rule; the split-screen rules above apply.
+  "splitscreen when coach is showing charts and when student is talking" (2026-11-02)
+- Each clip runs at least 1:30 and holds the whole story: the student's problem and the coach's solution,
+  never one without the other. Only the best teaching and inspirational moments. Pick them with
+  `styles/coaching-calls/clip-selection-prompt.md`, and open on the student's problem or question when
+  possible. The 1:30 minimum beats the prompt's 20-60 s. The clip report names each clip's problem and solution.
   "i think the coaching calls are too short of a clips, it has to have only the best teaching moments inspirational words it has to be at minimum 1minute as well and might as well use this prompt also." (2026-10-26)
+  "i want the duration to be minimum 1:30 include what the problem and coach's solution would be" (2026-11-02)
 - Hooks match the user's reference: short white caps on a red box per line, 2-3 short lines, over the
   speaker. No animation, high contrast.
   "I want text hooks for the clippings for coaching call to be this simple" (2026-10-26)
+- Hook words are written to stop the scroll, using proven curiosity formulas ("This is how...", "How a
+  trader...", "Why you keep...", "Stop doing this if...", "The real reason..."), built from the student's
+  problem and the payoff. See the hook formulas in `styles/coaching-calls.md`.
+  "text hook should be improved saying this is is how, or how a etc ... please improve it for people to get hooked" (2026-11-02)
 - Blur student surnames wherever they show (Zoom name tiles, camera labels, captions) and keep the first
   name. Coaches' names are not blurred.
   "any student name please blur the surname if there is one" (2026-10-26)

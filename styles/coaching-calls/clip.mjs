@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 // Coaching Calls: cut vertical clips from a call recording with plain FFmpeg.
 //   node clip.mjs [c01 c02 ...]      (all clips in clips.json when none given)
-// Screen-share recordings: "chartRanges" [[from, to]] marks source seconds where the share is on; those parts use the
-// "share" layout (chart crop on top, webcam crop below), with "share": { chart: [x, y, w, h], cam: [x, y, w, h] } in source pixels.
-// clips.json: { "name", "cx"?, "clips": [{ id, slug, hook: ["line", "*accent* line"], segs: [[start, end, "chart"?], ...] }] }
-// Camera parts: square crop around cx (fraction of width), 1080x1080. Chart parts: whole frame, 1080 wide.
+// Screen-share recordings: "chartRanges" [[from, to]] marks source seconds where the share is on; those parts (or segs marked
+// "chart") use the "share" split (chart fitted in the top half, coach webcam filling the bottom half), with
+// "share": { chart: [x, y, w, h], cam: [x, y, w, h] } in source pixels.
+// Student talking: "studentRanges" [[from, to]] or segs marked "student" use the "student" split (student tile fills the top
+// half, coach tile the bottom half), with "split": { student: [x, y, w, h], coach: [x, y, w, h] } (whole call or per clip).
+// clips.json: { "name", "cx"?, "clips": [{ id, slug, hook: ["line", "*accent* line"], segs: [[start, end, "chart"|"student"?], ...] }] }
+// Camera parts: square crop around cx (fraction of width), 1080x1080.
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
@@ -38,9 +41,12 @@ for (const clip of cfg.clips) {
   if (want.length && !want.includes(clip.id)) continue;
   // Keep ranges: speech only, split at gaps longer than GAP, so pauses and dead air are cut.
   const pieces = [];
-  const inShare = (t) => (cfg.chartRanges ?? []).some(([a, b]) => t >= a && t < b);
+  const inRanges = (r, t) => (r ?? []).some(([a, b]) => t >= a && t < b);
   for (const [s, e, given] of clip.segs) {
-    const kind = given ?? (inShare((s + e) / 2) ? 'share' : 'camera');
+    const mid = (s + e) / 2;
+    const kind = given === 'chart' ? 'share' : given ?? (inRanges(cfg.chartRanges, mid) ? 'share' : inRanges(clip.studentRanges ?? cfg.studentRanges, mid) ? 'student' : 'camera');
+    if (kind === 'share' && !cfg.share) throw new Error(`${clip.id}: chart parts need "share" crops in clips.json`);
+    if (kind === 'student' && !(clip.split ?? cfg.split)) throw new Error(`${clip.id}: student parts need "split" crops in clips.json`);
     const ws = words.filter((w) => w.start >= s - 0.01 && w.end <= e + 0.01);
     let cur = null;
     for (const w of ws) {
@@ -57,8 +63,10 @@ for (const clip of cfg.clips) {
   });
 
   // Video and audio per piece, then concat.
-  const sq = S.layout.camera, ch = S.layout.chart;
+  const sq = S.layout.camera, HALF = S.layout.half;
   const cx = clip.cx ?? cfg.cx ?? sq.cx;
+  // Split halves: crop a source box and zoom it to fill 1080x960, no borders.
+  const fill = ([x, y, w, h]) => `crop=${w}:${h}:${x}:${y},scale=${W}:${HALF}:force_original_aspect_ratio=increase:flags=lanczos,crop=${W}:${HALF},unsharp=5:5:0.8`;
   const f = [];
   let off = 0;
   const labels = [];
@@ -66,9 +74,7 @@ for (const clip of cfg.clips) {
     const dark = p.kind === 'share' ? camDark.filter(([a, b]) => b - a >= 0.5 && a < p.b && b > p.a).map(([a, b]) => [Math.max(0, a - p.a), Math.min(p.b, b) - p.a]) : [];
     for (const [a, b] of dark) labels.push([off + a, off + b]);
     off += p.b - p.a;
-    const look = p.kind === 'chart'
-      ? `scale=${W}:-2:flags=lanczos,pad=${W}:${H}:0:${ch.y}:black`
-      : `crop=ih:ih:'max(0,min(iw-ih,iw*${cx}-ih/2))':0,scale=${sq.size}:${sq.size}:flags=lanczos,unsharp=5:5:0.6,pad=${W}:${H}:0:${sq.y}:black`;
+    const look = `crop=ih:ih:'max(0,min(iw-ih,iw*${cx}-ih/2))':0,scale=${sq.size}:${sq.size}:flags=lanczos,unsharp=5:5:0.6,pad=${W}:${H}:0:${sq.y}:black`;
     // Student surnames: blur boxes in source pixels and source seconds, from clips.json "blur" (whole call) or a clip's own.
     const boxes = [...(cfg.blur ?? []), ...(clip.blur ?? [])].filter((b) => b.from < p.b && b.to > p.a);
     // Each piece is its own input seeked to its start, so long or 4K recordings are not decoded from the top.
@@ -81,12 +87,19 @@ for (const clip of cfg.clips) {
       src = `[u${i}_${k}]null`;
     });
     if (p.kind === 'share') {
-      const [chx, chy, chw, chh] = cfg.share.chart, [cmx, cmy, cmw, cmh] = cfg.share.cam, L = S.layout.share;
+      // Chart fitted inside the top half, sitting on the seam (a wide chart leaves a black band above it for the hook).
+      const [chx, chy, chw, chh] = cfg.share.chart;
       f.push(`${src},fps=30,split[sc${i}][sk${i}]`);
-      f.push(`[sc${i}]crop=${chw}:${chh}:${chx}:${chy},scale=${W}:-2:flags=lanczos,pad=${W}:${H}:0:${L.chartY}:black[sb${i}]`);
-      f.push(`[sk${i}]crop=${cmw}:${cmh}:${cmx}:${cmy},scale=${L.camSize}:${L.camSize}:flags=lanczos,unsharp=5:5:0.8[sf${i}]`);
+      f.push(`[sc${i}]crop=${chw}:${chh}:${chx}:${chy},scale=${W}:${HALF}:force_original_aspect_ratio=decrease:flags=lanczos,pad=${W}:${H}:(ow-iw)/2:${HALF}-ih:black[sb${i}]`);
+      f.push(`[sk${i}]${fill(cfg.share.cam)}[sf${i}]`);
       const show = dark.length ? `:enable='not(${dark.map(([a, b]) => `between(t,${a.toFixed(2)},${b.toFixed(2)})`).join('+')})'` : '';
-      f.push(`[sb${i}][sf${i}]overlay=${(W - L.camSize) / 2}:${L.camY}${show},setsar=1[v${i}]`);
+      f.push(`[sb${i}][sf${i}]overlay=0:${HALF}${show},setsar=1[v${i}]`);
+    } else if (p.kind === 'student') {
+      const sp = clip.split ?? cfg.split;
+      f.push(`${src},fps=30,split[st${i}][co${i}]`);
+      f.push(`[st${i}]${fill(sp.student)},pad=${W}:${H}:0:0:black[sb${i}]`);
+      f.push(`[co${i}]${fill(sp.coach)}[sf${i}]`);
+      f.push(`[sb${i}][sf${i}]overlay=0:${HALF},setsar=1[v${i}]`);
     } else f.push(`${src},fps=30,${look},setsar=1[v${i}]`);
     const d = p.b - p.a;
     f.push(`[${i}:a]asetpts=PTS-STARTPTS,afade=t=in:d=0.01,afade=t=out:st=${Math.max(0, d - 0.015)}:d=0.015[a${i}]`);
@@ -116,6 +129,10 @@ for (const clip of cfg.clips) {
   const total = t;
 
   const C = S.captions, K = S.hook;
+  // Hook sits where the opening layout has room: coach's chest, the band above the chart, or the student's chest.
+  const first = pieces[0]?.kind;
+  const chartTop = cfg.share ? HALF - Math.min(HALF, Math.round(W * cfg.share.chart[3] / cfg.share.chart[2])) : HALF;
+  const hookBottom = clip.hookBottom ?? cfg.hookBottom ?? (first === 'share' ? Math.min(S.layout.share.hookBottom, chartTop - 24) : first === 'student' ? S.layout.student.hookBottom : K.bottom);
   const assFile = `review/${clip.id}.ass`;
   writeFileSync(assFile, `[Script Info]
 ScriptType: v4.00+
@@ -124,15 +141,15 @@ PlayResY: ${H}
 WrapStyle: 1
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Hook,${K.font},${K.size},${ass(S.colours.hook)},${ass(S.colours.hook)},${ass(S.colours.hookBox)},${ass(S.colours.hookBox)},0,0,0,0,100,100,0,0,3,${K.pad},0,2,60,60,${H - (cfg.hookBottom ?? K.bottom)},1
-Style: CapShare,${C.font},${C.size},${ass(S.colours.caption)},${ass(S.colours.caption)},${ass(S.colours.captionBox)},${ass(S.colours.captionBox)},0,0,0,0,100,100,0,0,3,14,0,2,60,60,${H - S.layout.share.capY},1
+Style: Hook,${K.font},${K.size},${ass(S.colours.hook)},${ass(S.colours.hook)},${ass(S.colours.hookBox)},${ass(S.colours.hookBox)},0,0,0,0,100,100,0,0,3,${K.pad},0,2,60,60,${H - hookBottom},1
+Style: CapSeam,${C.font},${C.size},${ass(S.colours.caption)},${ass(S.colours.caption)},${ass(S.colours.captionBox)},${ass(S.colours.captionBox)},0,0,0,0,100,100,0,0,3,14,0,2,60,60,${H - S.layout.seamCapY},1
 Style: Who,${C.font},44,&H00FFFFFF&,&H00FFFFFF&,&H00333333&,&H00333333&,0,0,0,0,100,100,0,0,3,16,0,5,60,60,0,1
 Style: Cap,${C.font},${C.size},${ass(S.colours.caption)},${ass(S.colours.caption)},${ass(S.colours.captionBox)},${ass(S.colours.captionBox)},0,0,0,0,100,100,0,0,3,14,0,2,60,60,${H - C.y},1
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 1,${ts(0)},${ts(Math.min(total, S.hook.seconds ?? total))},Hook,,0,0,0,,{\\fs${hookSize(clip.hook)}}${clip.hook.map((l) => l.toUpperCase()).join('\\N')}
-${labels.map(([a, b]) => `Dialogue: 0,${ts(a)},${ts(b)},Who,,0,0,0,,{\\pos(${W / 2},${S.layout.share.camY + S.layout.share.camSize / 2})}STUDENT`).join('\n')}
-${caps.map(([a, b, x, k]) => `Dialogue: 0,${ts(a)},${ts(b)},${k === 'share' ? 'CapShare' : 'Cap'},,0,0,0,,${x.toUpperCase()}`).join('\n')}
+${labels.map(([a, b]) => `Dialogue: 0,${ts(a)},${ts(b)},Who,,0,0,0,,{\\pos(${W / 2},${HALF * 1.5})}STUDENT`).join('\n')}
+${caps.map(([a, b, x, k]) => `Dialogue: 0,${ts(a)},${ts(b)},${k === 'camera' ? 'Cap' : 'CapSeam'},,0,0,0,,${x.toUpperCase()}`).join('\n')}
 `);
   f.push(`[cv]subtitles=${assFile}:fontsdir=fonts[ov]`);
   f.push(`[ca]highpass=f=70,acompressor=threshold=-20dB:ratio=3:attack=5:release=120,loudnorm=I=-14:TP=-1.5:LRA=9,aresample=48000[oa]`);

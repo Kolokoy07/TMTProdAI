@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Writes the ranked clip report (the clip-selection prompt's format) from clips.json + analysis.json.
 //   node report.mjs   (run in the video's project folder)
-// analysis.json: { clips: { c01: { rank, score, type, why, scores: [hook, relate, edu, tension, payoff, standalone, viral], notes: [] } },
+// analysis.json: { clips: { c01: { rank, score, type, problem, solution, hooks?: [["line", ...], ...], why, scores: [hook, relate, edu, tension, payoff, standalone, viral], notes: [] } },
 //   groups: { must: [], edu: [], psych: [], relatable: [], debate: [] }, series: [[name, text]] }
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
@@ -21,14 +21,17 @@ const byId = Object.fromEntries(cfg.clips.map((c) => [c.id, c]));
 const ranked = Object.entries(A.clips).sort((a, b) => a[1].rank - b[1].rank);
 const name = (id) => `#${A.clips[id].rank} ${byId[id].hook.join(' ')}`;
 
-let md = `# ${cfg.name}: clip report\n\nRanked with \`styles/coaching-calls/clip-selection-prompt.md\`. Every clip is at least 60 seconds.\n` +
+let md = `# ${cfg.name}: clip report\n\nRanked with \`styles/coaching-calls/clip-selection-prompt.md\`. Every clip is at least 1:30 and runs from the student's problem to the coach's solution.\n` +
   `Files: \`outbox/${cfg.name}/${cfg.name}-NN-<topic>-${cfg.version ?? 'v1'}.mp4\` (NN is the clip id below).\n\n`;
 for (const [id, a] of ranked) {
   const c = byId[id];
   const cap = (t) => t.split(" ").slice(0, 22).join(" ") + (t.split(" ").length > 22 ? " ..." : "");
   const first = text(...c.segs[0].slice(0, 2)), last = text(...c.segs.at(-1).slice(0, 2));
   md += `## Clip #${a.rank} (${id}, ${c.slug})\n\n**Score:** ${a.score}/10  \n**Hook type:** ${a.type}  \n` +
-    `**Suggested hook (on screen):** ${c.hook.join(' / ')}  \n**Estimated duration:** ${dur(c)}\n\n` +
+    `**Problem:** ${a.problem ?? '-'}  \n**Coach's solution:** ${a.solution ?? '-'}  \n` +
+    `**Suggested hook (on screen):** ${c.hook.join(' / ')}  \n` +
+    (a.hooks?.length ? `**Other hook options:** ${a.hooks.map((h) => h.join(' / ')).join('; ')}  \n` : '') +
+    `**Estimated duration:** ${dur(c)}\n\n` +
     `**Start:** "${cap(first.split(/(?<=[.?!])\s/)[0])}"  \n**End:** "${cap(last.split(/(?<=[.?!])\s/).at(-1))}"\n\n` +
     `**Exact transcript** (source times; parts in the order they play):\n\n` +
     c.segs.map(([s, e]) => `> [${mmss(s)}-${mmss(e)}] ${text(s, e)}`).join('\n>\n') + '\n\n' +
