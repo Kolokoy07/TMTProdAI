@@ -13,7 +13,7 @@
   "hook": {
     "font": "Arial Black",
     "size": 72,
-    "pad": 12,
+    "pad": 14,
     "bottom": 1300,
     "lines": "2-3 short lines, max ~18 characters each",
     "upper": true,
@@ -21,8 +21,12 @@
     "hold": "4.5 s from the start, always under 5 s",
     "seconds": 4.5,
     "placement": "by the first part: over the coach chest (camera), black band above the chart (chart split), over the student chest (student split)",
-    "note": "white caps on a red box per line, like the user's reference; never animated; short and plain",
-    "copy": "curiosity formulas: This is how / How a trader / Why you keep / Stop ... if / The real reason / Do this before; built from the student problem plus the payoff; see coaching-calls.md"
+    "note": "white caps on a red box per line with rounded corners, like the user reference; never animated; short and plain",
+    "copy": "curiosity formulas: This is how / How a trader / Why you keep / Stop ... if / The real reason / Do this before; built from the student problem plus the payoff; see coaching-calls.md",
+    "padX": 26,
+    "radius": 18,
+    "gap": 8,
+    "nudge": 0.04
   },
   "captions": {
     "font": "Arial Black",
@@ -37,19 +41,55 @@
       "size": 1080,
       "y": 420,
       "cx": 0.47,
-      "note": "square crop of the speaker, full width"
+      "note": "square crop of the speaker, full width",
+      "grid": {
+        "base": "#000000",
+        "cell": 64,
+        "lineAlpha": 0.09,
+        "drift": [
+          1.05,
+          1.6
+        ],
+        "glows": [
+          [
+            150,
+            150,
+            640,
+            0.27,
+            "#2BD46A"
+          ],
+          [
+            990,
+            1740,
+            600,
+            0.23,
+            "#F5C84C"
+          ],
+          [
+            450,
+            1350,
+            450,
+            0.13,
+            "#4678FF"
+          ]
+        ],
+        "note": "coach-only frames: the Coach Tim reels background (black, faint white 64 px grid drifting slowly, soft green/gold/blue glows); glows are [x, y, radius, strength, colour]"
+      }
     },
-    "split": "chart parts and student-talking parts are split screen (top half 1080x960, coach fills the bottom half, no borders); coach-only camera parts stay a single full-width square",
+    "split": "coach showing charts and student talking are split screen (top half 1080x960, coach fills the bottom half, no borders); coach-only camera parts stay a single full-width square",
     "safeZone": "hook and captions above y 1530 and left of the right-edge button column",
     "share": {
       "chartBand": "chart fitted inside the top half, sitting on the seam",
       "hookBottom": 340,
-      "note": "coach showing charts: chart on top, coach webcam fills the bottom half"
+      "note": "coach showing charts: chart on top, coach webcam fills the bottom half; when the chart fills the whole top half, the hook sits over its lower part (hookOver); the band above the chart holds the hook only when it fits below topSafe",
+      "hookOver": 900,
+      "topSafe": 110
     },
     "half": 960,
     "student": {
-      "hookBottom": 900,
-      "note": "student talking: student fills the top half, coach fills the bottom half"
+      "hookBottom": 340,
+      "note": "student talking with camera off: keep the split continuous, a still of the clip nearest chart on top and the coach listening below (listen: {at, len, crop}); mode \"card\" (or a clip with no chart) shows the first-name card on top instead",
+      "mode": "chart"
     },
     "seamCapY": 1000
   },

@@ -12,8 +12,9 @@ Script for the Coaching Calls style (`styles/coaching-calls.md`). Plain FFmpeg, 
    a student surname. `cx` is where the coach sits across the frame (0-1) for coach-only parts.
    Coach showing charts (split, chart on top): mark parts `"chart"` or add `"chartRanges": [[from, to]]`, plus
    `"share": { "chart": [x, y, w, h], "cam": [x, y, w, h] }` (source pixels).
-   Student talking (split, student on top): mark parts `"student"` or add `"studentRanges"`, plus
-   `"split": { "student": [x, y, w, h], "coach": [x, y, w, h] }` (whole call, or per clip when the student changes).
+   Student talking, no charts (split, name card on top): mark parts `"student"` (4th value or clip `"student"` = first name)
+   or add `"studentRanges"`, plus `"listen": { "at", "len", "crop": [x, y, w, h] }` (a quiet on-camera stretch of the coach).
+   Student sharing charts: mark `"studentchart"` with `"studentShare": { "chart": [x, y, w, h] }`.
    Crop boxes near 9:8 fill the halves best. The hook places itself by the first part's layout (`hookBottom` overrides).
    Each clip is at least 90 s and runs from the student's problem through the coach's solution.
    Long recordings: transcribe in 30-minute audio parts and merge (Groq's 25 MB cap).

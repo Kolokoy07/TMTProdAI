@@ -7,18 +7,26 @@ chart screen-shares). Updated 2026-11-02: split screen, 1:30 minimum, curiosity 
 - Clips: only the best teaching and inspirational moments, each at least 1:30 (90-150 s). Every clip holds
   the full arc: the student's problem, then the coach's solution, ending on the payoff. Rank them with
   `styles/coaching-calls/clip-selection-prompt.md`; open on the student's problem or question whenever possible.
-- Format: 9:16 1080x1920 on solid black.
+- Format: 9:16 1080x1920. Coach-only frames sit on the Coach Tim reels background (black, faint white
+  64 px grid drifting slowly, soft green top-left, gold bottom-right and blue glows); other layouts on black.
+  `camBox` in `clips.json` crops off Zoom's letterbox bars first.
 - Three layouts, switched per part:
   - Coach talking on camera: the coach as a full-width square (1080x1080) centred in the frame (y 420).
   - Coach showing charts (`"chart"` parts, or inside `chartRanges`): split screen. The chart fills the top half
     (fitted to 1080x960 and sitting on the seam, so a 16:9 chart leaves a black band above it for the hook). The
     coach's webcam fills the bottom half (1080x960), zoomed in with no border. Crops: `share.chart` and `share.cam`.
-  - Student talking (`"student"` parts, or inside `studentRanges`): split screen. The student fills the top half
-    and the coach (listening) fills the bottom half, both 1080x960 with no borders. Crops: `split.student` and
-    `split.coach` (per clip when the student changes).
+  - Student talking with camera off (`"student"` parts, or inside `studentRanges`): the split stays continuous and
+    only the coach appears. A still of the clip's nearest chart (the next one, else the one before) holds the top
+    half; the coach listening fills the bottom half. Zoom shows only the student's tile then, so the coach shot comes
+    from a quiet on-camera moment: `listen: { at, len, crop }`, played as a forward-and-back loop. Only when the clip
+    has no chart (or `layout.student.mode` is "card") does a dark first-name card (initial tile, name, red STUDENT
+    pill; never the surname) take the top half. Name: the clip's `student` or a 4th seg value.
+  - Student sharing their own charts (`"studentchart"` parts): their chart on top (`studentShare.chart`), the same
+    coach listening shot below.
+  - When the chart fills the whole top half, the hook sits over its lower part (`hookOver`).
 - Captions: one short line (max 24 characters), white caps on a black box. Coach-only parts put them just under
   the video; split parts put them on the seam between the halves. Always above the Reels/TikTok safe line.
-- Hook: short white caps on a red box per line (#E3161D), Arial Black, 2-3 lines of max ~18 characters, on screen
+- Hook: short white caps on a red box per line (#E3161D) with rounded corners (radius 18, 8 px gap between boxes), Arial Black, 2-3 lines of max ~18 characters, on screen
   for the first 4.5 s (always under 5 s). No animation. Placed by the first part's layout: over the coach's chest
   (coach only), in the black band above the chart (chart split), or over the student's chest (student split).
 - Hook words: write them to stop the scroll. Build each from the student's problem plus the payoff, using one of

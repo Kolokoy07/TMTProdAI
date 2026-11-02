@@ -9,7 +9,7 @@ import { spawnSync } from 'node:child_process';
 const cfg = JSON.parse(readFileSync('clips.json', 'utf8'));
 const A = JSON.parse(readFileSync('analysis.json', 'utf8'));
 const words = JSON.parse(readFileSync('assets/raw.json', 'utf8')).words;
-const text = (s, e) => words.filter((w) => w.start >= s - 0.01 && w.end <= e + 0.01).map((w) => w.text.trim()).join(' ');
+const text = (s, e) => words.filter((w) => w.start >= s - 0.01 && w.start < e).map((w) => w.text.trim()).join(' ');
 const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 const dur = (c) => {
   const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', `renders/${c.id}.mp4`], { encoding: 'utf8' });

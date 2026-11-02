@@ -26,6 +26,9 @@ apply to; "Every edit" applies to all of them.
   "I want the cuts to be tighter" (2026-10-25)
 - Never speed up footage to tighten pacing.
   "no speed ups" (2026-10-25)
+- When finals are rendered for a batch, put them in a `finals/` folder and the drafts in `drafts/` inside the
+  video's outbox folder, so the finals are easy to find.
+  "folder them after so I know" (2026-11-02)
 
 ## Vertical videos (reels, shorts, ads)
 
@@ -58,9 +61,20 @@ apply to; "Every edit" applies to all of them.
 - Make as many clips as the call allows. Chart screen-shares stay readable.
   "make a new style for this types of clippings call it coaching calls, insert simple text hooks with every video no need animated. as long as it has high contrast." (2026-10-26)
 - Split screen while the coach shows charts (chart on top, coach below) and while the student talks
-  (student on top, coach below). Only the coach talking on camera stays a single full-width shot. This
+  (student card on top, coach below). Only the coach talking on camera stays a single full-width shot. This
   replaces the earlier "no split screen" rule; the split-screen rules above apply.
   "splitscreen when coach is showing charts and when student is talking" (2026-11-02)
+- Charts: layout A, the chart fills the top half and the coach fills the bottom half.
+  "i like A" (2026-11-02)
+- Keep the split continuous and only the coach visible: while a student talks, keep a chart on top (a still of the
+  clip's nearest chart when none is on screen) and the coach listening below (a quiet on-camera moment of the coach,
+  since Zoom does not show him while the student talks). The student's name card (layout C) is used only when the
+  clip has no chart at all.
+  "student talking i want C, but only if there are no charts" (2026-11-02)
+  "when possible just dont make the student appear just coach so its a continous split" (2026-11-02)
+- Coach-only frames sit on the Coach Tim reels background: black, a faint white grid drifting slowly, and soft
+  green, gold, and blue glows. Only the coach-only frames get it. (A lighter gold-line grid was too light.)
+  "can you put a background grid based on our colors for just the coach frames" / "thats too light remember the background you used for coach tim reels" (2026-11-02)
 - Each clip runs at least 1:30 and holds the whole story: the student's problem and the coach's solution,
   never one without the other. Only the best teaching and inspirational moments. Pick them with
   `styles/coaching-calls/clip-selection-prompt.md`, and open on the student's problem or question when
@@ -68,8 +82,9 @@ apply to; "Every edit" applies to all of them.
   "i think the coaching calls are too short of a clips, it has to have only the best teaching moments inspirational words it has to be at minimum 1minute as well and might as well use this prompt also." (2026-10-26)
   "i want the duration to be minimum 1:30 include what the problem and coach's solution would be" (2026-11-02)
 - Hooks match the user's reference: short white caps on a red box per line, 2-3 short lines, over the
-  speaker. No animation, high contrast.
+  speaker. No animation, high contrast. Each red box has rounded corners.
   "I want text hooks for the clippings for coaching call to be this simple" (2026-10-26)
+  "roundoff the edges of these text hooks" (2026-11-02)
 - Hook words are written to stop the scroll, using proven curiosity formulas ("This is how...", "How a
   trader...", "Why you keep...", "Stop doing this if...", "The real reason..."), built from the student's
   problem and the payoff. See the hook formulas in `styles/coaching-calls.md`.
