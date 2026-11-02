@@ -228,6 +228,11 @@ fn run_claude(app: AppHandle, running: State<Running>, prompt: String, resume: O
     if let Some(id) = resume {
         cmd.args(["--resume", &id]);
     }
+    // Started from inside a Claude session (dev runs), the app inherits that session's
+    // CLAUDE* variables, which make the CLI ignore the user's own sign-in.
+    for (key, _) in std::env::vars().filter(|(k, _)| k.starts_with("CLAUDE")) {
+        cmd.env_remove(key);
+    }
     let mut child = hide(&mut cmd)
         .current_dir(&repo)
         .env("PATH", &path)
