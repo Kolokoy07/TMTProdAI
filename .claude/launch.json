@@ -18,6 +18,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--prefix", "kit/video-projects/mateportal-saas-ad-2026-10-31", "hyperframes", "preview", "kit/video-projects/mateportal-saas-ad-2026-10-31", "--port", "4571"],
       "port": 4571
+    },
+    {
+      "name": "forex-studio",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--prefix", "kit/video-projects/forex-crash-course-2026-11-04", "hyperframes", "preview", "kit/video-projects/forex-crash-course-2026-11-04", "--port", "4572"],
+      "port": 4572
     }
   ]
 }
