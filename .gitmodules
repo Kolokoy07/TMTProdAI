@@ -1,0 +1,8 @@
+[submodule "vendor/awesome-opus5-5-videos"]
+	path = vendor/awesome-opus5-5-videos
+	url = https://github.com/yihui-dev/awesome-opus5-5-videos
+	shallow = true
+[submodule "vendor/remotion"]
+	path = vendor/remotion
+	url = https://github.com/remotion-dev/remotion
+	shallow = true
